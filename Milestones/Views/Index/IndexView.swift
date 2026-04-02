@@ -1,5 +1,5 @@
 //
-//  IndexView.swift
+//  IndexView.swift → AppendixView.swift
 //  Milestones
 //
 //  Created by Michael Fluharty on 4/1/26.
@@ -8,8 +8,8 @@
 import SwiftUI
 import SwiftData
 
-/// The back of the journal — the milestone index. (4.1, 9.2)
-struct IndexView: View {
+/// The back of the journal — the appendix of life milestones. (4.1, 9.2)
+struct AppendixView: View {
     @Environment(\.modelContext) private var modelContext
     @Query(
         filter: #Predicate<MilestoneEntry> { $0.isMilestone },
@@ -28,7 +28,7 @@ struct IndexView: View {
                     milestoneList
                 }
             }
-            .navigationTitle("Index")
+            .navigationTitle("Appendix")
             .toolbar {
                 ToolbarItem(placement: .primaryAction) {
                     Button {
@@ -61,7 +61,7 @@ struct IndexView: View {
         ContentUnavailableView {
             Label("No Milestones Yet", systemImage: "star")
         } description: {
-            Text("Add significant dates to build your life's index.")
+            Text("Add significant dates to build your life's appendix.")
         }
     }
 
@@ -70,7 +70,6 @@ struct IndexView: View {
     private func deleteMilestones(offsets: IndexSet) {
         withAnimation {
             for index in offsets {
-                // Remove milestone flag, don't delete the entry
                 milestones[index].isMilestone = false
             }
         }

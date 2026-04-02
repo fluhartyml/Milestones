@@ -8,24 +8,29 @@
 import SwiftUI
 import SwiftData
 
-/// Root tab navigator — front of journal (timeline) and back of journal (index). (9.1, 9.2)
+/// Root tab navigator — like a physical book: TOC, Journal, About, Appendix.
 struct ContentView: View {
 
     var body: some View {
         TabView {
+            TableOfContentsView()
+                .tabItem {
+                    Label("Contents", systemImage: "list.bullet")
+                }
+
             JournalTimelineView()
                 .tabItem {
                     Label("Journal", systemImage: "book")
                 }
 
-            IndexView()
-                .tabItem {
-                    Label("Index", systemImage: "star")
-                }
-
             AboutView()
                 .tabItem {
                     Label("About", systemImage: "info.circle")
+                }
+
+            AppendixView()
+                .tabItem {
+                    Label("Appendix", systemImage: "star")
                 }
         }
     }
