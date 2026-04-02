@@ -12,7 +12,10 @@ import SwiftData
 struct JournalTimelineView: View {
     @Environment(\.modelContext) private var modelContext
     @Query(sort: \MilestoneEntry.eventDate, order: .reverse) private var entries: [MilestoneEntry]
-    @State private var showingCompose = false
+    @State private var editingEntry: MilestoneEntry?
+
+    private let locationService = LocationService()
+    private let weatherService = WeatherService()
 
     var body: some View {
         NavigationStack {
@@ -27,14 +30,26 @@ struct JournalTimelineView: View {
             .toolbar {
                 ToolbarItem(placement: .primaryAction) {
                     Button {
-                        showingCompose = true
+                        createNewEntry()
                     } label: {
                         Label("New Entry", systemImage: "plus")
                     }
                 }
             }
-            .fullScreenCover(isPresented: $showingCompose) {
-                ComposeEntryView()
+            .fullScreenCover(item: $editingEntry) { entry in
+                NavigationStack {
+                    EntryDetailView(entry: entry)
+                        .toolbar {
+                            ToolbarItem(placement: .confirmationAction) {
+                                Button("Done") {
+                                    editingEntry = nil
+                                }
+                            }
+                        }
+                }
+            }
+            .onAppear {
+                locationService.requestPermission()
             }
         }
     }
@@ -44,9 +59,12 @@ struct JournalTimelineView: View {
     private var entryList: some View {
         List {
             ForEach(entries) { entry in
-                NavigationLink(destination: EntryDetailView(entry: entry)) {
+                Button {
+                    editingEntry = entry
+                } label: {
                     EntryRowView(entry: entry)
                 }
+                .tint(.primary)
             }
             .onDelete(perform: deleteEntries)
         }
@@ -61,6 +79,27 @@ struct JournalTimelineView: View {
     }
 
     // MARK: - Actions
+
+    private func createNewEntry() {
+        let entry = MilestoneEntry(
+            eventDate: Date(),
+            title: ""
+        )
+        modelContext.insert(entry)
+
+        // Stamp location + weather
+        locationService.requestLocation()
+        Task {
+            try? await Task.sleep(for: .seconds(1))
+            await locationService.stampEntry(entry)
+            if let location = locationService.currentLocation {
+                await weatherService.stampWeather(on: entry, at: location)
+            }
+        }
+
+        // Open the entry full screen
+        editingEntry = entry
+    }
 
     private func deleteEntries(offsets: IndexSet) {
         withAnimation {

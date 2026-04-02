@@ -6,177 +6,209 @@
 //
 
 import SwiftUI
+import PhotosUI
 
-/// Full detail view for a single journal entry.
+/// Full detail view for a single journal entry. All fields auto-save via SwiftData.
 struct EntryDetailView: View {
     @Bindable var entry: MilestoneEntry
 
+    // MARK: - Photo State
+
+    @State private var sightPhotoItems: [PhotosPickerItem] = []
+    @State private var smellPhotoItem: PhotosPickerItem?
+    @State private var tastePhotoItem: PhotosPickerItem?
+
+    // Track which senses are active
+    @State private var activeSenses: Set<SenseType> = []
+    @State private var hasLoadedSenses = false
+
     var body: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: 20) {
+        Form {
+            // MARK: - Core
 
-                // MARK: - Header
+            Section("Entry") {
+                TextField("Title", text: $entry.title)
 
-                VStack(alignment: .leading, spacing: 8) {
-                    DateStampView(date: entry.eventDate)
+                DatePicker("Date", selection: $entry.eventDate, displayedComponents: [.date, .hourAndMinute])
 
-                    Text(entry.title)
-                        .font(.title.bold())
+                TextField("Write about this moment...", text: $entry.body, axis: .vertical)
+                    .lineLimit(4...20)
+            }
 
-                    HStack(spacing: 12) {
-                        if let location = entry.locationName {
-                            Label(location, systemImage: "location.fill")
-                                .font(.subheadline)
-                                .foregroundStyle(.secondary)
+            // MARK: - Filing Stamp
+
+            Section {
+                DateStampView(date: entry.eventDate)
+            }
+
+            // MARK: - Weather
+
+            if entry.hasWeather {
+                Section("Weather") {
+                    HStack(spacing: 16) {
+                        if let temp = entry.weatherTemperature {
+                            Label("\(Int(temp))°F", systemImage: "thermometer.medium")
                         }
-
-                        WeatherBadgeView(entry: entry)
-                    }
-                }
-
-                Divider()
-
-                // MARK: - Photos (Sight)
-
-                if let photos = entry.sightPhotos, !photos.isEmpty {
-                    ScrollView(.horizontal, showsIndicators: false) {
-                        HStack(spacing: 12) {
-                            ForEach(photos.indices, id: \.self) { index in
-                                if let uiImage = platformImage(from: photos[index]) {
-                                    Image(platformImage: uiImage)
-                                        .resizable()
-                                        .scaledToFill()
-                                        .frame(width: 200, height: 200)
-                                        .clipShape(RoundedRectangle(cornerRadius: 12))
-                                }
-                            }
+                        if let humidity = entry.weatherHumidity {
+                            Label("\(Int(humidity))%", systemImage: "humidity.fill")
+                        }
+                        if let wind = entry.weatherWindSpeed {
+                            Label("\(Int(wind)) mph", systemImage: "wind")
+                        }
+                        if let uv = entry.weatherUVIndex {
+                            Label("UV \(uv)", systemImage: "sun.max.fill")
                         }
                     }
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+
+                    WeatherAttributionView()
                 }
+            }
 
-                // MARK: - Body Text
+            // MARK: - Location
 
-                if !entry.body.isEmpty {
-                    Text(entry.body)
-                        .font(.body)
+            if let location = entry.locationName {
+                Section("Location") {
+                    Label(location, systemImage: "location.fill")
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
                 }
+            }
 
-                // MARK: - Senses Detail
+            // MARK: - Senses
 
-                if !entry.activeSenses.isEmpty {
-                    VStack(alignment: .leading, spacing: 12) {
-                        Text("Senses")
-                            .font(.headline)
-
-                        // Touch
-                        if let touch = entry.touchDescription, !touch.isEmpty {
-                            senseRow(type: .touch, text: touch)
-                        }
-
-                        // Smell
-                        if let smell = entry.smellDescription, !smell.isEmpty {
-                            senseRow(type: .smell, text: smell)
-                        }
-
-                        // Taste
-                        if let taste = entry.tasteDescription, !taste.isEmpty {
-                            senseRow(type: .taste, text: taste)
-                        }
+            Section("Senses") {
+                SensePicker(activeSenses: $activeSenses)
+                    .padding(.vertical, 4)
+                    .onChange(of: activeSenses) { _, newValue in
+                        entry.activeSenses = newValue.map(\.rawValue)
                     }
+            }
+
+            // MARK: - Active Sense Inputs
+
+            if activeSenses.contains(.sight) {
+                Section {
+                    sightSection
                 }
+            }
 
-                // MARK: - Weather Detail
-
-                if entry.hasWeather {
-                    weatherDetailSection
+            if activeSenses.contains(.touch) {
+                Section {
+                    TouchInputView(description: Binding(
+                        get: { entry.touchDescription ?? "" },
+                        set: { entry.touchDescription = $0.isEmpty ? nil : $0 }
+                    ))
                 }
+            }
 
-                // MARK: - Milestone Toggle
+            if activeSenses.contains(.smell) {
+                Section {
+                    SmellInputView(
+                        description: Binding(
+                            get: { entry.smellDescription ?? "" },
+                            set: { entry.smellDescription = $0.isEmpty ? nil : $0 }
+                        ),
+                        photoItem: $smellPhotoItem,
+                        photoData: Binding(
+                            get: { entry.smellPhoto },
+                            set: { entry.smellPhoto = $0 }
+                        )
+                    )
+                }
+            }
 
+            if activeSenses.contains(.taste) {
+                Section {
+                    TasteInputView(
+                        description: Binding(
+                            get: { entry.tasteDescription ?? "" },
+                            set: { entry.tasteDescription = $0.isEmpty ? nil : $0 }
+                        ),
+                        photoItem: $tastePhotoItem,
+                        photoData: Binding(
+                            get: { entry.tastePhoto },
+                            set: { entry.tastePhoto = $0 }
+                        )
+                    )
+                }
+            }
+
+            // MARK: - Appendix Toggle
+
+            Section {
                 Toggle(isOn: $entry.isMilestone) {
                     Label("Add as Significant to Appendix", systemImage: "star.fill")
                 }
                 .tint(.orange)
-
-                Spacer()
             }
-            .padding()
         }
-        .navigationTitle(entry.filingName)
+        .navigationTitle(entry.title.isEmpty ? "New Entry" : entry.title)
         #if os(iOS)
         .navigationBarTitleDisplayMode(.inline)
         #endif
-    }
-
-    // MARK: - Subviews
-
-    private func senseRow(type: SenseType, text: String) -> some View {
-        HStack(alignment: .top, spacing: 10) {
-            Image(systemName: type.icon)
-                .foregroundStyle(.secondary)
-                .frame(width: 24)
-            VStack(alignment: .leading) {
-                Text(type.displayName)
-                    .font(.caption.bold())
-                    .foregroundStyle(.secondary)
-                Text(text)
-                    .font(.subheadline)
+        .onAppear {
+            if !hasLoadedSenses {
+                activeSenses = Set(entry.activeSenses.compactMap { SenseType(rawValue: $0) })
+                hasLoadedSenses = true
             }
         }
     }
+
+    // MARK: - Sight Section
 
     @ViewBuilder
-    private var weatherDetailSection: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Text("Weather")
-                .font(.headline)
+    private var sightSection: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Label("Sight — What do you see?", systemImage: "eye")
+                .font(.subheadline.bold())
 
-            HStack(spacing: 16) {
-                if let temp = entry.weatherTemperature {
-                    Label("\(Int(temp))°F", systemImage: "thermometer.medium")
-                }
-                if let humidity = entry.weatherHumidity {
-                    Label("\(Int(humidity))%", systemImage: "humidity.fill")
-                }
-                if let wind = entry.weatherWindSpeed {
-                    Label("\(Int(wind)) mph", systemImage: "wind")
-                }
-                if let uv = entry.weatherUVIndex {
-                    Label("UV \(uv)", systemImage: "sun.max.fill")
+            PhotosPicker(
+                selection: $sightPhotoItems,
+                maxSelectionCount: 5,
+                matching: .images
+            ) {
+                Label("Choose Photos", systemImage: "photo.on.rectangle")
+            }
+            .onChange(of: sightPhotoItems) { _, newItems in
+                Task {
+                    var photos: [Data] = []
+                    for item in newItems {
+                        if let data = try? await item.loadTransferable(type: Data.self) {
+                            photos.append(data)
+                        }
+                    }
+                    entry.sightPhotos = photos.isEmpty ? nil : photos
                 }
             }
-            .font(.subheadline)
-            .foregroundStyle(.secondary)
 
-            WeatherAttributionView()
+            // Show existing photos
+            if let photos = entry.sightPhotos, !photos.isEmpty {
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: 8) {
+                        ForEach(photos.indices, id: \.self) { index in
+                            #if os(macOS)
+                            if let image = NSImage(data: photos[index]) {
+                                Image(nsImage: image)
+                                    .resizable()
+                                    .scaledToFill()
+                                    .frame(width: 80, height: 80)
+                                    .clipShape(RoundedRectangle(cornerRadius: 8))
+                            }
+                            #else
+                            if let image = UIImage(data: photos[index]) {
+                                Image(uiImage: image)
+                                    .resizable()
+                                    .scaledToFill()
+                                    .frame(width: 80, height: 80)
+                                    .clipShape(RoundedRectangle(cornerRadius: 8))
+                            }
+                            #endif
+                        }
+                    }
+                }
+            }
         }
     }
-
-    // MARK: - Platform Image Helper
-
-    #if os(macOS)
-    private func platformImage(from data: Data) -> NSImage? {
-        NSImage(data: data)
-    }
-    #else
-    private func platformImage(from data: Data) -> UIImage? {
-        UIImage(data: data)
-    }
-    #endif
 }
-
-// MARK: - Platform Image Extension
-
-#if os(macOS)
-extension Image {
-    init(platformImage: NSImage) {
-        self.init(nsImage: platformImage)
-    }
-}
-#else
-extension Image {
-    init(platformImage: UIImage) {
-        self.init(uiImage: platformImage)
-    }
-}
-#endif
