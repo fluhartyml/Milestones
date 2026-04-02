@@ -14,16 +14,10 @@ struct JournalTimelineView: View {
     @Query(sort: \MilestoneEntry.eventDate, order: .reverse) private var entries: [MilestoneEntry]
 
     @State private var showingEntry = false
-    @State private var activeEntryID: PersistentIdentifier?
+    @State private var activeEntry: MilestoneEntry?
 
     private let locationService = LocationService()
     private let weatherService = WeatherService()
-
-    /// Resolve the active entry from its stable ID
-    private var activeEntry: MilestoneEntry? {
-        guard let id = activeEntryID else { return nil }
-        return entries.first { $0.persistentModelID == id }
-    }
 
     var body: some View {
         NavigationStack {
@@ -70,7 +64,7 @@ struct JournalTimelineView: View {
         List {
             ForEach(entries) { entry in
                 Button {
-                    activeEntryID = entry.persistentModelID
+                    activeEntry = entry
                     showingEntry = true
                 } label: {
                     EntryRowView(entry: entry)
@@ -109,7 +103,7 @@ struct JournalTimelineView: View {
         }
 
         // Open the entry full screen
-        activeEntryID = entry.persistentModelID
+        activeEntry = entry
         showingEntry = true
     }
 
