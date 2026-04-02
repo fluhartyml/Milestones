@@ -109,7 +109,7 @@ struct ComposeEntryView: View {
 
                 Section {
                     Toggle(isOn: $isMilestone) {
-                        Label("Add to Index", systemImage: "star.fill")
+                        Label("Add as Significant to Appendix", systemImage: "star.fill")
                     }
                     .tint(.orange)
                 }

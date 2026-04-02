@@ -94,7 +94,7 @@ struct EntryDetailView: View {
                 // MARK: - Milestone Toggle
 
                 Toggle(isOn: $entry.isMilestone) {
-                    Label("Milestone", systemImage: "star.fill")
+                    Label("Add as Significant to Appendix", systemImage: "star.fill")
                 }
                 .tint(.orange)
 
