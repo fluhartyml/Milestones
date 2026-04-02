@@ -33,7 +33,7 @@ struct JournalTimelineView: View {
                     }
                 }
             }
-            .sheet(isPresented: $showingCompose) {
+            .fullScreenCover(isPresented: $showingCompose) {
                 ComposeEntryView()
             }
         }
