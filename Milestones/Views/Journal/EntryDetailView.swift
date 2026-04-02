@@ -144,7 +144,7 @@ struct EntryDetailView: View {
                 .tint(.orange)
             }
         }
-        .navigationTitle(entry.title.isEmpty ? "New Entry" : entry.title)
+        .navigationTitle("Entry")
         #if os(iOS)
         .navigationBarTitleDisplayMode(.inline)
         #endif

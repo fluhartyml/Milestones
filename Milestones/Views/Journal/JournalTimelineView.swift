@@ -12,10 +12,18 @@ import SwiftData
 struct JournalTimelineView: View {
     @Environment(\.modelContext) private var modelContext
     @Query(sort: \MilestoneEntry.eventDate, order: .reverse) private var entries: [MilestoneEntry]
-    @State private var editingEntry: MilestoneEntry?
+
+    @State private var showingEntry = false
+    @State private var activeEntryID: PersistentIdentifier?
 
     private let locationService = LocationService()
     private let weatherService = WeatherService()
+
+    /// Resolve the active entry from its stable ID
+    private var activeEntry: MilestoneEntry? {
+        guard let id = activeEntryID else { return nil }
+        return entries.first { $0.persistentModelID == id }
+    }
 
     var body: some View {
         NavigationStack {
@@ -36,16 +44,18 @@ struct JournalTimelineView: View {
                     }
                 }
             }
-            .fullScreenCover(item: $editingEntry) { entry in
-                NavigationStack {
-                    EntryDetailView(entry: entry)
-                        .toolbar {
-                            ToolbarItem(placement: .confirmationAction) {
-                                Button("Done") {
-                                    editingEntry = nil
+            .fullScreenCover(isPresented: $showingEntry) {
+                if let entry = activeEntry {
+                    NavigationStack {
+                        EntryDetailView(entry: entry)
+                            .toolbar {
+                                ToolbarItem(placement: .confirmationAction) {
+                                    Button("Done") {
+                                        showingEntry = false
+                                    }
                                 }
                             }
-                        }
+                    }
                 }
             }
             .onAppear {
@@ -60,7 +70,8 @@ struct JournalTimelineView: View {
         List {
             ForEach(entries) { entry in
                 Button {
-                    editingEntry = entry
+                    activeEntryID = entry.persistentModelID
+                    showingEntry = true
                 } label: {
                     EntryRowView(entry: entry)
                 }
@@ -98,7 +109,8 @@ struct JournalTimelineView: View {
         }
 
         // Open the entry full screen
-        editingEntry = entry
+        activeEntryID = entry.persistentModelID
+        showingEntry = true
     }
 
     private func deleteEntries(offsets: IndexSet) {
