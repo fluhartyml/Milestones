@@ -147,6 +147,8 @@ struct EntryDetailView: View {
             }
             .font(.subheadline)
             .foregroundStyle(.secondary)
+
+            WeatherAttributionView()
         }
     }
 
