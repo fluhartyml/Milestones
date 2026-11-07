@@ -35,6 +35,11 @@ final class LocationService: NSObject, CLLocationManagerDelegate {
         manager.requestLocation()
     }
 
+    /// Re-read the permission, e.g. on return from the Settings app (Settings' Access Location, line 001.12).
+    func refreshStatus() {
+        authorizationStatus = manager.authorizationStatus
+    }
+
     /// Reverse geocode a coordinate into a human-readable place name.
     func reverseGeocode(_ location: CLLocation) async -> String? {
         do {
@@ -71,6 +76,11 @@ final class LocationService: NSObject, CLLocationManagerDelegate {
         authorizationStatus = manager.authorizationStatus
         #if os(macOS)
         if authorizationStatus == .authorized || authorizationStatus == .authorizedAlways {
+            manager.requestLocation()
+        }
+        #elseif os(visionOS)
+        // REM: 2026-11-07 — Vision Pro has no "Always" permission; using it broke the visionOS build.
+        if authorizationStatus == .authorizedWhenInUse {
             manager.requestLocation()
         }
         #else

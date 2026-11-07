@@ -32,6 +32,15 @@ struct ContentView: View {
                 .tabItem {
                     Label("Appendix", systemImage: "star")
                 }
+
+            // REM: line 001.12 — Settings holds Access Location. On the Mac it is the Settings
+            // window (Command-comma) instead, see MilestonesApp.
+            #if !os(macOS)
+            SettingsView()
+                .tabItem {
+                    Label("Settings", systemImage: "gearshape")
+                }
+            #endif
         }
     }
 }

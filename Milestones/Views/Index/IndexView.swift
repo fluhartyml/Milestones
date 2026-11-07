@@ -38,7 +38,7 @@ struct AppendixView: View {
                     }
                 }
             }
-            .fullScreenCover(isPresented: $showingAddMilestone) {
+            .entryCover(isPresented: $showingAddMilestone) {
                 AddMilestoneView()
             }
         }

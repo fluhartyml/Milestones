@@ -28,5 +28,12 @@ struct MilestonesApp: App {
             ContentView()
         }
         .modelContainer(sharedModelContainer)
+
+        #if os(macOS)
+        // REM: line 001.12 — Access Location lives in the Mac's Settings window (Command-comma).
+        Settings {
+            SettingsView()
+        }
+        #endif
     }
 }

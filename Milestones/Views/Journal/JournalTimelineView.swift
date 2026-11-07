@@ -38,7 +38,7 @@ struct JournalTimelineView: View {
                     }
                 }
             }
-            .fullScreenCover(isPresented: $showingEntry) {
+            .entryCover(isPresented: $showingEntry) {
                 if let entry = activeEntry {
                     NavigationStack {
                         EntryDetailView(entry: entry)
