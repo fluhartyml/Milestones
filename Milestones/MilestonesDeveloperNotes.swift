@@ -27,6 +27,47 @@
 //  Wiki:           https://github.com/fluhartyml/Milestones/wiki (created, Home page initialized)
 //  License:        GPL v3 — Share and share alike with attribution required
 //
+// MARK: - App Store Connect
+//
+// ** Claude: Update this section as information becomes available.
+// ** Keep current with every submission. This is the source of truth.
+//
+//  App Name:           Milestones
+//  App Apple ID:       (not yet submitted)
+//  Bundle ID:          com.inkwell.Milestones
+//  Category:           Lifestyle (Journal)
+//  URL:                (pending first submission)
+//  Current Version:    1.0 (pre-release)
+//  Status:             In development — v1.0 scaffold built
+//
+//  Subtitle:           (TBD)
+//
+//  Promotional Text (170 char max, updatable anytime):
+//    (TBD)
+//
+//  Description:
+//    (TBD)
+//
+//  What's New:
+//    (TBD — first submission)
+//
+//  Privacy:            No ads. No tracking. All data stays on your device.
+//  License:            GPL v3
+//
+//  Version History:
+//    v1.0 (2026-04-01) — Scaffold built, 22 Swift files, running on iPad mini
+//
+// MARK: - Current Status (APR 02 2026)
+//
+//  CURRENT FOCUS. Next up: shakedown and submission.
+//  - Rebuild and test on iPad mini — location permission prompt
+//  - Verify WeatherKit working after App Services enabled
+//  - Test auto-save flow — create entry, tap Done, verify persistence
+//  - Delete test entries from APR 01 debugging
+//  - Build shakedown checklist
+//  - Continue v1.0 features from versioned roadmap below
+//  - 18pt minimum font height for all user-facing text
+//
 // MARK: - Frameworks Required
 //
 //  WeatherKit         — Current + historical weather (back to 1970s), auto-tagged on every entry
