@@ -24,18 +24,18 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		C0AEA96F2F7DE7AE0063360B /* Milestones.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Milestones.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		C0AEA9802F7DE7AF0063360B /* MilestonesTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MilestonesTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		C0AEA98A2F7DE7AF0063360B /* MilestonesUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MilestonesUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		C0AEA96F2F7DE7AE0063360B /* MilestonesJournal.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MilestonesJournal.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		C0AEA9802F7DE7AF0063360B /* MilestonesJournalTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MilestonesJournalTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		C0AEA98A2F7DE7AF0063360B /* MilestonesJournalUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MilestonesJournalUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
-		C0AEA9922F7DE7AF0063360B /* Exceptions for "Milestones" folder in "Milestones" target */ = {
+		C0AEA9922F7DE7AF0063360B /* Exceptions for "Milestones" folder in "MilestonesJournal" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Info.plist,
 			);
-			target = C0AEA96E2F7DE7AE0063360B /* Milestones */;
+			target = C0AEA96E2F7DE7AE0063360B /* MilestonesJournal */;
 		};
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
@@ -43,7 +43,7 @@
 		C0AEA9712F7DE7AE0063360B /* Milestones */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
-				C0AEA9922F7DE7AF0063360B /* Exceptions for "Milestones" folder in "Milestones" target */,
+				C0AEA9922F7DE7AF0063360B /* Exceptions for "Milestones" folder in "MilestonesJournal" target */,
 			);
 			path = Milestones;
 			sourceTree = "<group>";
@@ -98,9 +98,9 @@
 		C0AEA9702F7DE7AE0063360B /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				C0AEA96F2F7DE7AE0063360B /* Milestones.app */,
-				C0AEA9802F7DE7AF0063360B /* MilestonesTests.xctest */,
-				C0AEA98A2F7DE7AF0063360B /* MilestonesUITests.xctest */,
+				C0AEA96F2F7DE7AE0063360B /* MilestonesJournal.app */,
+				C0AEA9802F7DE7AF0063360B /* MilestonesJournalTests.xctest */,
+				C0AEA98A2F7DE7AF0063360B /* MilestonesJournalUITests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -108,9 +108,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		C0AEA96E2F7DE7AE0063360B /* Milestones */ = {
+		C0AEA96E2F7DE7AE0063360B /* MilestonesJournal */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = C0AEA9932F7DE7AF0063360B /* Build configuration list for PBXNativeTarget "Milestones" */;
+			buildConfigurationList = C0AEA9932F7DE7AF0063360B /* Build configuration list for PBXNativeTarget "MilestonesJournal" */;
 			buildPhases = (
 				C0AEA96B2F7DE7AE0063360B /* Sources */,
 				C0AEA96C2F7DE7AE0063360B /* Frameworks */,
@@ -123,16 +123,16 @@
 			fileSystemSynchronizedGroups = (
 				C0AEA9712F7DE7AE0063360B /* Milestones */,
 			);
-			name = Milestones;
+			name = MilestonesJournal;
 			packageProductDependencies = (
 			);
 			productName = Milestones;
-			productReference = C0AEA96F2F7DE7AE0063360B /* Milestones.app */;
+			productReference = C0AEA96F2F7DE7AE0063360B /* MilestonesJournal.app */;
 			productType = "com.apple.product-type.application";
 		};
-		C0AEA97F2F7DE7AF0063360B /* MilestonesTests */ = {
+		C0AEA97F2F7DE7AF0063360B /* MilestonesJournalTests */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = C0AEA9982F7DE7AF0063360B /* Build configuration list for PBXNativeTarget "MilestonesTests" */;
+			buildConfigurationList = C0AEA9982F7DE7AF0063360B /* Build configuration list for PBXNativeTarget "MilestonesJournalTests" */;
 			buildPhases = (
 				C0AEA97C2F7DE7AF0063360B /* Sources */,
 				C0AEA97D2F7DE7AF0063360B /* Frameworks */,
@@ -146,16 +146,16 @@
 			fileSystemSynchronizedGroups = (
 				C0AEA9832F7DE7AF0063360B /* MilestonesTests */,
 			);
-			name = MilestonesTests;
+			name = MilestonesJournalTests;
 			packageProductDependencies = (
 			);
 			productName = MilestonesTests;
-			productReference = C0AEA9802F7DE7AF0063360B /* MilestonesTests.xctest */;
+			productReference = C0AEA9802F7DE7AF0063360B /* MilestonesJournalTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
-		C0AEA9892F7DE7AF0063360B /* MilestonesUITests */ = {
+		C0AEA9892F7DE7AF0063360B /* MilestonesJournalUITests */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = C0AEA99B2F7DE7AF0063360B /* Build configuration list for PBXNativeTarget "MilestonesUITests" */;
+			buildConfigurationList = C0AEA99B2F7DE7AF0063360B /* Build configuration list for PBXNativeTarget "MilestonesJournalUITests" */;
 			buildPhases = (
 				C0AEA9862F7DE7AF0063360B /* Sources */,
 				C0AEA9872F7DE7AF0063360B /* Frameworks */,
@@ -169,11 +169,11 @@
 			fileSystemSynchronizedGroups = (
 				C0AEA98D2F7DE7AF0063360B /* MilestonesUITests */,
 			);
-			name = MilestonesUITests;
+			name = MilestonesJournalUITests;
 			packageProductDependencies = (
 			);
 			productName = MilestonesUITests;
-			productReference = C0AEA98A2F7DE7AF0063360B /* MilestonesUITests.xctest */;
+			productReference = C0AEA98A2F7DE7AF0063360B /* MilestonesJournalUITests.xctest */;
 			productType = "com.apple.product-type.bundle.ui-testing";
 		};
 /* End PBXNativeTarget section */
@@ -199,7 +199,7 @@
 					};
 				};
 			};
-			buildConfigurationList = C0AEA96A2F7DE7AE0063360B /* Build configuration list for PBXProject "Milestones" */;
+			buildConfigurationList = C0AEA96A2F7DE7AE0063360B /* Build configuration list for PBXProject "MilestonesJournal" */;
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
@@ -213,9 +213,9 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				C0AEA96E2F7DE7AE0063360B /* Milestones */,
-				C0AEA97F2F7DE7AF0063360B /* MilestonesTests */,
-				C0AEA9892F7DE7AF0063360B /* MilestonesUITests */,
+				C0AEA96E2F7DE7AE0063360B /* MilestonesJournal */,
+				C0AEA97F2F7DE7AF0063360B /* MilestonesJournalTests */,
+				C0AEA9892F7DE7AF0063360B /* MilestonesJournalUITests */,
 			);
 		};
 /* End PBXProject section */
@@ -271,12 +271,12 @@
 /* Begin PBXTargetDependency section */
 		C0AEA9822F7DE7AF0063360B /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = C0AEA96E2F7DE7AE0063360B /* Milestones */;
+			target = C0AEA96E2F7DE7AE0063360B /* MilestonesJournal */;
 			targetProxy = C0AEA9812F7DE7AF0063360B /* PBXContainerItemProxy */;
 		};
 		C0AEA98C2F7DE7AF0063360B /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = C0AEA96E2F7DE7AE0063360B /* Milestones */;
+			target = C0AEA96E2F7DE7AE0063360B /* MilestonesJournal */;
 			targetProxy = C0AEA98B2F7DE7AF0063360B /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
@@ -288,15 +288,17 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 14;
+				CURRENT_PROJECT_VERSION = 15;
 				DEVELOPMENT_TEAM = 3X3F6UJ44H;
 				ENABLE_APP_SANDBOX = YES;
-				ENABLE_RESOURCE_ACCESS_LOCATION = YES;
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
+				ENABLE_RESOURCE_ACCESS_LOCATION = YES;
 				ENABLE_USER_SELECTED_FILES = readonly;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Milestones/Info.plist;
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Milestones uses your location to geotag journal entries and fetch local weather conditions.";
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.lifestyle";
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphonesimulator*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphoneos*]" = YES;
@@ -334,15 +336,17 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 14;
+				CURRENT_PROJECT_VERSION = 15;
 				DEVELOPMENT_TEAM = 3X3F6UJ44H;
 				ENABLE_APP_SANDBOX = YES;
-				ENABLE_RESOURCE_ACCESS_LOCATION = YES;
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
+				ENABLE_RESOURCE_ACCESS_LOCATION = YES;
 				ENABLE_USER_SELECTED_FILES = readonly;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Milestones/Info.plist;
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Milestones uses your location to geotag journal entries and fetch local weather conditions.";
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.lifestyle";
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphonesimulator*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphoneos*]" = YES;
@@ -495,7 +499,7 @@
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 14;
+				CURRENT_PROJECT_VERSION = 15;
 				DEVELOPMENT_TEAM = 3X3F6UJ44H;
 				GENERATE_INFOPLIST_FILE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 26.2;
@@ -511,7 +515,7 @@
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2,7";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Milestones.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Milestones";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/MilestonesJournal.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/MilestonesJournal";
 				XROS_DEPLOYMENT_TARGET = 26.2;
 			};
 			name = Debug;
@@ -521,7 +525,7 @@
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 14;
+				CURRENT_PROJECT_VERSION = 15;
 				DEVELOPMENT_TEAM = 3X3F6UJ44H;
 				GENERATE_INFOPLIST_FILE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 26.2;
@@ -537,7 +541,7 @@
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2,7";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Milestones.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Milestones";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/MilestonesJournal.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/MilestonesJournal";
 				XROS_DEPLOYMENT_TARGET = 26.2;
 			};
 			name = Release;
@@ -546,7 +550,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 14;
+				CURRENT_PROJECT_VERSION = 15;
 				DEVELOPMENT_TEAM = 3X3F6UJ44H;
 				GENERATE_INFOPLIST_FILE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 26.2;
@@ -571,7 +575,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 14;
+				CURRENT_PROJECT_VERSION = 15;
 				DEVELOPMENT_TEAM = 3X3F6UJ44H;
 				GENERATE_INFOPLIST_FILE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 26.2;
@@ -595,7 +599,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		C0AEA96A2F7DE7AE0063360B /* Build configuration list for PBXProject "Milestones" */ = {
+		C0AEA96A2F7DE7AE0063360B /* Build configuration list for PBXProject "MilestonesJournal" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				C0AEA9962F7DE7AF0063360B /* Debug */,
@@ -604,7 +608,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		C0AEA9932F7DE7AF0063360B /* Build configuration list for PBXNativeTarget "Milestones" */ = {
+		C0AEA9932F7DE7AF0063360B /* Build configuration list for PBXNativeTarget "MilestonesJournal" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				C0AEA9942F7DE7AF0063360B /* Debug */,
@@ -613,7 +617,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		C0AEA9982F7DE7AF0063360B /* Build configuration list for PBXNativeTarget "MilestonesTests" */ = {
+		C0AEA9982F7DE7AF0063360B /* Build configuration list for PBXNativeTarget "MilestonesJournalTests" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				C0AEA9992F7DE7AF0063360B /* Debug */,
@@ -622,7 +626,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		C0AEA99B2F7DE7AF0063360B /* Build configuration list for PBXNativeTarget "MilestonesUITests" */ = {
+		C0AEA99B2F7DE7AF0063360B /* Build configuration list for PBXNativeTarget "MilestonesJournalUITests" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				C0AEA99C2F7DE7AF0063360B /* Debug */,

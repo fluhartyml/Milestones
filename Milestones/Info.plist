@@ -6,7 +6,5 @@
 	<array>
 		<string>remote-notification</string>
 	</array>
-	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>Milestones uses your location to geotag journal entries and fetch local weather conditions.</string>
 </dict>
 </plist>
