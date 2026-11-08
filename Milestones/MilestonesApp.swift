@@ -10,6 +10,17 @@ import SwiftData
 
 @main
 struct MilestonesApp: App {
+    init() {
+        #if DEBUG
+        // REM: the robot's "first launch" switch (line 002.1): clears the name so the ask shows again.
+        // Debug builds only — a TestFlight or App Store build never reads it.
+        if ProcessInfo.processInfo.arguments.contains("-UITestFreshStart") {
+            UserDefaults.standard.removeObject(forKey: UserNameKeys.name)
+            UserDefaults.standard.removeObject(forKey: UserNameKeys.asked)
+        }
+        #endif
+    }
+
     var sharedModelContainer: ModelContainer = {
         let schema = Schema([
             MilestoneEntry.self,

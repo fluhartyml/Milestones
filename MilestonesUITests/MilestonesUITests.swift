@@ -41,6 +41,7 @@ final class MilestonesUITests: XCTestCase {
         let app = XCUIApplication()
         app.launch()
         dismissAnyAppleAlert()
+        skipNameAsk(app)
 
         // REM: iOS 27's tab bar doesn't report as a TabBar element (seen 11-07), so find the tab by name.
         let settingsTab = app.buttons["Settings"].firstMatch
@@ -83,6 +84,7 @@ final class MilestonesUITests: XCTestCase {
             if let size { app.launchArguments += ["-UIPreferredContentSizeCategoryName", size] }
             app.launch()
             dismissAnyAppleAlert()
+            skipNameAsk(app)
             let settingsTab = app.buttons["Settings"].firstMatch
             XCTAssertTrue(settingsTab.waitForExistence(timeout: 5), "No Settings tab")
             settingsTab.tap()
@@ -98,7 +100,59 @@ final class MilestonesUITests: XCTestCase {
         XCTAssertGreaterThanOrEqual(largest, normal * 2, "Text didn't grow with the text-size setting")
     }
 
+    /// Line 002.1: first launch asks "What should we call you?"; the journal greets you; Settings can change it.
+    @MainActor
+    func test4_FirstLaunchAsksYourName() throws {
+        let app = XCUIApplication()
+        app.launchArguments += ["-UITestFreshStart"]
+        app.launch()
+        dismissAnyAppleAlert()
+
+        let field = app.textFields["nameField"]
+        XCTAssertTrue(field.waitForExistence(timeout: 5), "No name question at first launch")
+        XCTAssertTrue(app.staticTexts["What should we call you?"].exists, "Name question has no heading")
+        XCTAssertFalse(app.buttons["nameContinue"].isEnabled, "Continue should wait for a name")
+        field.tap()
+        field.typeText("Robot")
+        XCTAssertTrue(app.buttons["nameContinue"].isEnabled, "Continue stayed off after typing")
+        attachScreenshot("name question, typed")
+        try app.performAccessibilityAudit(for: XCUIAccessibilityAuditType.all.subtracting([.dynamicType, .textClipped])) { issue in
+            print("AUDIT [Name] \(issue.auditType) — \(issue.compactDescription) — \(issue.element?.debugDescription.prefix(120) ?? "")")
+            return false
+        }
+        app.buttons["nameContinue"].tap()
+        XCTAssertTrue(field.waitForNonExistence(timeout: 5), "Name question didn't close")
+
+        let journalTab = app.buttons["Journal"].firstMatch
+        XCTAssertTrue(journalTab.waitForExistence(timeout: 5), "No Journal tab")
+        journalTab.tap()
+        let greeting = app.staticTexts["greeting"]
+        XCTAssertTrue(greeting.waitForExistence(timeout: 5), "No greeting on the journal")
+        XCTAssertEqual(greeting.label, "Hello, Robot")
+        attachScreenshot("journal greeting")
+
+        app.buttons["Settings"].firstMatch.tap()
+        let settingsName = app.textFields["settingsName"]
+        var swipes = 0
+        while !settingsName.exists && swipes < 6 { app.swipeUp(); swipes += 1 }
+        XCTAssertTrue(settingsName.exists, "No name field in Settings")
+        XCTAssertEqual(settingsName.value as? String, "Robot", "Settings doesn't show the saved name")
+
+        // A second launch must not ask again.
+        app.terminate()
+        let again = XCUIApplication()
+        again.launch()
+        XCTAssertFalse(again.textFields["nameField"].waitForExistence(timeout: 3), "Name question came back on the second launch")
+    }
+
     // MARK: - Helpers
+
+    /// Earlier tests aren't about the name: tap Not Now if the question is up.
+    @MainActor
+    private func skipNameAsk(_ app: XCUIApplication) {
+        let skip = app.buttons["nameSkip"]
+        if skip.waitForExistence(timeout: 3) { skip.tap() }
+    }
 
     @MainActor
     private func dismissAnyAppleAlert() {

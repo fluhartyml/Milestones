@@ -29,6 +29,8 @@ import UIKit
 struct SettingsView: View {
 
     @State private var location = LocationService()
+    // REM: line 002.1 — "In both apps you can change the name in Settings." Edits save as you type.
+    @AppStorage(UserNameKeys.name) private var userName = ""
     @Environment(\.openURL) private var openURL
     @Environment(\.scenePhase) private var scenePhase
 
@@ -82,6 +84,24 @@ struct SettingsView: View {
                 }
                 .padding(.vertical, 6)
             }
+
+            // REM: after Location on purpose — the robot's Location checks find that section first.
+            Section {
+                VStack(alignment: .leading, spacing: 12) {
+                    Label {
+                        Text("Your Name").font(.system(size: headingSize, weight: .semibold))
+                    } icon: {
+                        Image(systemName: "person.fill").foregroundStyle(.tint)
+                    }
+                    Text("Milestones greets you by this name at the top of your journal. Leave it empty for no greeting.")
+                        .font(.system(size: bodySize))
+                    TextField("Your name", text: $userName)
+                        .font(.system(size: bodySize))
+                        .textFieldStyle(.roundedBorder)
+                        .accessibilityIdentifier("settingsName")
+                }
+                .padding(.vertical, 6)
+            }
         }
         #if os(macOS)
         .formStyle(.grouped)
@@ -93,7 +113,7 @@ struct SettingsView: View {
     }
 
     /// Deeper blue in light mode, bright blue in dark mode, so the button text clears the contrast check.
-    private static var buttonBlue: Color {
+    static var buttonBlue: Color {
         #if canImport(UIKit)
         Color(UIColor { traits in
             traits.userInterfaceStyle == .dark

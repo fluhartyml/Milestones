@@ -11,7 +11,17 @@ import SwiftData
 /// Root tab navigator — like a physical book: TOC, Journal, About, Appendix.
 struct ContentView: View {
 
+    // REM: line 002.1 — the name is asked once, at first launch, over the journal (NameAskView).
+    @AppStorage(UserNameKeys.asked) private var askedForName = false
+
     var body: some View {
+        tabs
+            .sheet(isPresented: Binding(get: { !askedForName }, set: { _ in })) {
+                NameAskView()
+            }
+    }
+
+    private var tabs: some View {
         TabView {
             TableOfContentsView()
                 .tabItem {

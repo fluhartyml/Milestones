@@ -14,6 +14,9 @@ struct JournalTimelineView: View {
     @Query(sort: \MilestoneEntry.eventDate, order: .reverse) private var entries: [MilestoneEntry]
 
     @State private var showingEntry = false
+    // REM: line 002.1 — "greets you by name at the top of the journal". No name, no greeting.
+    @AppStorage(UserNameKeys.name) private var userName = ""
+    @ScaledMetric(relativeTo: .title3) private var greetingSize: CGFloat = 22
     @State private var activeEntry: MilestoneEntry?
 
     private let locationService = LocationService()
@@ -26,6 +29,17 @@ struct JournalTimelineView: View {
                     emptyState
                 } else {
                     entryList
+                }
+            }
+            .safeAreaInset(edge: .top, spacing: 0) {
+                if !userName.isEmpty {
+                    Text("Hello, \(userName)")
+                        .font(.system(size: greetingSize, weight: .semibold))
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding(.horizontal)
+                        .padding(.vertical, 8)
+                        .accessibilityAddTraits(.isHeader)
+                        .accessibilityIdentifier("greeting")
                 }
             }
             .navigationTitle("Journal")
