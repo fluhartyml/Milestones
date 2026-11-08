@@ -21,6 +21,7 @@
 //
 
 import CoreLocation
+import UserNotifications
 import SwiftUI
 #if canImport(UIKit)
 import UIKit
@@ -31,6 +32,11 @@ struct SettingsView: View {
     @State private var location = LocationService()
     // REM: line 002.1 — "In both apps you can change the name in Settings." Edits save as you type.
     @AppStorage(UserNameKeys.name) private var userName = ""
+    // REM: line 032 — the daily reminder. 8 PM to start (Claude's pick); you change it here.
+    @AppStorage(ReminderKeys.on) private var reminderOn = false
+    @AppStorage(ReminderKeys.hour) private var reminderHour = 20
+    @AppStorage(ReminderKeys.minute) private var reminderMinute = 0
+    @State private var notificationsOff = false
     @Environment(\.openURL) private var openURL
     @Environment(\.scenePhase) private var scenePhase
 
@@ -102,14 +108,93 @@ struct SettingsView: View {
                 }
                 .padding(.vertical, 6)
             }
+
+            reminderSection
         }
         #if os(macOS)
         .formStyle(.grouped)
         #endif
         // Back from the Settings app: show what changed there.
         .onChange(of: scenePhase) { _, phase in
-            if phase == .active { location.refreshStatus() }
+            if phase == .active { location.refreshStatus(); Task { await refreshNotifications() } }
         }
+        .task { await refreshNotifications() }
+    }
+
+    // MARK: - Daily reminder (line 032)
+
+    private var reminderSection: some View {
+        Section {
+            VStack(alignment: .leading, spacing: 12) {
+                Label {
+                    Text("Daily Reminder").font(.system(size: headingSize, weight: .semibold))
+                } icon: {
+                    Image(systemName: "bell.fill").foregroundStyle(.tint)
+                }
+                Text("Each day at the time you pick, Milestones reminds you: \u{201C}Time to write today\u{2019}s entry.\u{201D}")
+                    .font(.system(size: bodySize))
+                Toggle(isOn: Binding(get: { reminderOn }, set: { turnReminder($0) })) {
+                    Text("Remind Me Each Day").font(.system(size: bodySize, weight: .semibold))
+                }
+                .accessibilityIdentifier("reminderToggle")
+                if reminderOn {
+                    DatePicker(selection: reminderTime, displayedComponents: .hourAndMinute) {
+                        Text("Time").font(.system(size: bodySize))
+                    }
+                    .accessibilityIdentifier("reminderTime")
+                }
+                if notificationsOff {
+                    // REM: his 002.2 rule — after a no, the way back is the Settings app; this button opens it.
+                    Text("Notifications are off for Milestones, so the reminder can't show. Turn them on in \(settingsAppName).")
+                        .font(.system(size: bodySize))
+                        .foregroundStyle(.secondary)
+                    Button(action: openNotificationSettings) {
+                        Text("Access Notifications").font(.system(size: bodySize, weight: .semibold))
+                            .foregroundStyle(Self.buttonBlue)
+                    }
+                    .buttonStyle(.bordered)
+                    .accessibilityIdentifier("accessNotifications")
+                }
+            }
+            .padding(.vertical, 6)
+        }
+    }
+
+    private var reminderTime: Binding<Date> {
+        Binding(
+            get: { Calendar.current.date(from: DateComponents(hour: reminderHour, minute: reminderMinute)) ?? .now },
+            set: { date in
+                let parts = Calendar.current.dateComponents([.hour, .minute], from: date)
+                reminderHour = parts.hour ?? 20
+                reminderMinute = parts.minute ?? 0
+                Task { await ReminderService.apply(on: reminderOn, hour: reminderHour, minute: reminderMinute) }
+            })
+    }
+
+    private func turnReminder(_ on: Bool) {
+        Task {
+            if on, !(await ReminderService.requestPermission()) {
+                reminderOn = false
+                notificationsOff = true
+                return
+            }
+            reminderOn = on
+            await ReminderService.apply(on: on, hour: reminderHour, minute: reminderMinute)
+            await refreshNotifications()
+        }
+    }
+
+    private func refreshNotifications() async {
+        notificationsOff = await ReminderService.status() == .denied
+    }
+
+    private func openNotificationSettings() {
+        #if os(macOS)
+        let address = "x-apple.systempreferences:com.apple.Notifications-Settings.extension"
+        #else
+        let address = UIApplication.openNotificationSettingsURLString
+        #endif
+        if let url = URL(string: address) { openURL(url) }
     }
 
     /// Deeper blue in light mode, bright blue in dark mode, so the button text clears the contrast check.

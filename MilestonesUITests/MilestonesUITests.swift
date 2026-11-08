@@ -145,6 +145,32 @@ final class MilestonesUITests: XCTestCase {
         XCTAssertFalse(again.textFields["nameField"].waitForExistence(timeout: 3), "Name question came back on the second launch")
     }
 
+    /// Line 032: Settings → Daily Reminder. Turning it on asks Apple's question; after Allow, the time picker shows.
+    @MainActor
+    func test5_DailyReminderInSettings() throws {
+        let app = XCUIApplication()
+        app.launch()
+        dismissAnyAppleAlert()
+        skipNameAsk(app)
+        app.buttons["Settings"].firstMatch.tap()
+        let toggle = app.switches["reminderToggle"].firstMatch
+        var swipes = 0
+        while !(toggle.exists && toggle.isHittable) && swipes < 8 { app.swipeUp(); swipes += 1 }
+        XCTAssertTrue(toggle.exists, "No Daily Reminder switch in Settings")
+        // A switch's tap lands on its label in a Form row; tap the switch itself at its right edge.
+        toggle.coordinate(withNormalizedOffset: CGVector(dx: 0.93, dy: 0.5)).tap()
+        let allow = springboard.buttons["Allow"]
+        if allow.waitForExistence(timeout: 5) { allow.tap() }
+        let time = app.datePickers["reminderTime"].firstMatch
+        XCTAssertTrue(time.waitForExistence(timeout: 5), "No time picker after turning the reminder on")
+        XCTAssertEqual(toggle.value as? String, "1", "The reminder switch didn't stay on")
+        attachScreenshot("Daily Reminder on")
+        try app.performAccessibilityAudit(for: XCUIAccessibilityAuditType.all.subtracting([.dynamicType, .textClipped])) { issue in
+            print("AUDIT [Reminder] \(issue.auditType) — \(issue.compactDescription) — \(issue.element?.debugDescription.prefix(120) ?? "")")
+            return false
+        }
+    }
+
     // MARK: - Helpers
 
     /// Earlier tests aren't about the name: tap Not Now if the question is up.

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+  Milestones upload to TestFlight. NO internal-only flag (his word 2026-11-02: "its not your place to decide").
+  manageAppVersionAndBuildNumber OFF so the build number stays the commit count (a duplicate fails loudly).
+    xcodebuild -exportArchive -archivePath <archive> -exportOptionsPlist Scripts/ExportOptions-TestFlight.plist -exportPath <tmp> -allowProvisioningUpdates
+-->
+<plist version="1.0"><dict>
+<key>method</key><string>app-store-connect</string>
+<key>destination</key><string>upload</string>
+<key>teamID</key><string>3X3F6UJ44H</string>
+<key>signingStyle</key><string>automatic</string>
+<key>testFlightInternalTestingOnly</key><false/>
+<key>manageAppVersionAndBuildNumber</key><false/>
+</dict></plist>
