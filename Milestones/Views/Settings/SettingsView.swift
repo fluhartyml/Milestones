@@ -36,6 +36,8 @@ struct SettingsView: View {
     @AppStorage(ReminderKeys.on) private var reminderOn = false
     @AppStorage(ReminderKeys.hour) private var reminderHour = 20
     @AppStorage(ReminderKeys.minute) private var reminderMinute = 0
+    @AppStorage(ReminderKeys.persistent) private var reminderPersistent = false
+    @AppStorage(ReminderKeys.snoozeMinutes) private var snoozeMinutes = 60
     @State private var notificationsOff = false
     @Environment(\.openURL) private var openURL
     @Environment(\.scenePhase) private var scenePhase
@@ -142,6 +144,27 @@ struct SettingsView: View {
                         Text("Time").font(.system(size: bodySize))
                     }
                     .accessibilityIdentifier("reminderTime")
+                    // REM: line 032.2, his design: Persistent, and when it's on, the Snooze time below it.
+                    Toggle(isOn: Binding(get: { reminderPersistent },
+                                         set: { reminderPersistent = $0; Task { await ReminderService.refresh() } })) {
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text("Persistent").font(.system(size: bodySize, weight: .semibold))
+                            Text("Keeps reminding you until you write today\u{2019}s entry.").font(.system(size: bodySize))
+                                .foregroundStyle(.secondary)
+                        }
+                    }
+                    .accessibilityIdentifier("reminderPersistent")
+                    if reminderPersistent {
+                        Picker(selection: Binding(get: { snoozeMinutes },
+                                                  set: { snoozeMinutes = $0; Task { await ReminderService.refresh() } })) {
+                            ForEach(ReminderService.snoozeChoices, id: \.self) { m in
+                                Text("\(m) min").font(.system(size: bodySize)).tag(m)
+                            }
+                        } label: {
+                            Text("Snooze").font(.system(size: bodySize))
+                        }
+                        .accessibilityIdentifier("reminderSnooze")
+                    }
                 }
                 if notificationsOff {
                     // REM: his 002.2 rule — after a no, the way back is the Settings app; this button opens it.

@@ -13,11 +13,16 @@ struct ContentView: View {
 
     // REM: line 002.1 — the name is asked once, at first launch, over the journal (NameAskView).
     @AppStorage(UserNameKeys.asked) private var askedForName = false
+    @Environment(\.scenePhase) private var scenePhase
 
     var body: some View {
         tabs
             .sheet(isPresented: Binding(get: { !askedForName }, set: { _ in })) {
                 NameAskView()
+            }
+            // REM: line 032.2 — the reminder's repeats are rebuilt each time you come back (a new day, a written entry).
+            .onChange(of: scenePhase) { _, phase in
+                if phase == .active { Task { await ReminderService.refresh() } }
             }
     }
 

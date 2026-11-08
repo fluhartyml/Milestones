@@ -105,6 +105,8 @@ struct JournalTimelineView: View {
             title: ""
         )
         modelContext.insert(entry)
+        // REM: line 032.2 — writing today's entry stops today's reminder repeats.
+        Task { await ReminderService.entryWritten() }
 
         // Stamp location + weather
         locationService.requestLocation()

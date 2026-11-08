@@ -7,10 +7,14 @@
 
 import SwiftUI
 import SwiftData
+import UserNotifications
 
 @main
 struct MilestonesApp: App {
     init() {
+        // REM: line 032.1 — the reminder's Snooze / Keep Reminding Me buttons are answered by ReminderDelegate.
+        UNUserNotificationCenter.current().delegate = ReminderDelegate.shared
+        ReminderService.registerCategories()
         #if DEBUG
         // REM: the robot's "first launch" switch (line 002.1): clears the name so the ask shows again.
         // Debug builds only — a TestFlight or App Store build never reads it.

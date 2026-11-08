@@ -171,6 +171,37 @@ final class MilestonesUITests: XCTestCase {
         }
     }
 
+    /// Lines 032.1/032.2: with the reminder on, Persistent shows; turning it on shows Snooze, starting at 60 min.
+    @MainActor
+    func test6_PersistentShowsSnooze() throws {
+        let app = XCUIApplication()
+        app.launch()
+        dismissAnyAppleAlert()
+        skipNameAsk(app)
+        app.buttons["Settings"].firstMatch.tap()
+        let toggle = app.switches["reminderToggle"].firstMatch
+        var swipes = 0
+        while !(toggle.exists && toggle.isHittable) && swipes < 8 { app.swipeUp(); swipes += 1 }
+        if (toggle.value as? String) != "1" {
+            toggle.coordinate(withNormalizedOffset: CGVector(dx: 0.93, dy: 0.5)).tap()
+            let allow = springboard.buttons["Allow"]
+            if allow.waitForExistence(timeout: 5) { allow.tap() }
+        }
+        let persistent = app.switches["reminderPersistent"].firstMatch
+        swipes = 0
+        while !(persistent.exists && persistent.isHittable) && swipes < 6 { app.swipeUp(); swipes += 1 }
+        XCTAssertTrue(persistent.exists, "No Persistent switch under the reminder")
+        if (persistent.value as? String) != "1" { persistent.coordinate(withNormalizedOffset: CGVector(dx: 0.93, dy: 0.5)).tap() }
+        let snooze = app.descendants(matching: .any)["reminderSnooze"].firstMatch
+        XCTAssertTrue(snooze.waitForExistence(timeout: 5), "No Snooze picker after turning Persistent on")
+        print("SNOOZE shows: \(snooze.label) \(String(describing: snooze.value))")
+        attachScreenshot("Persistent + Snooze")
+        try app.performAccessibilityAudit(for: XCUIAccessibilityAuditType.all.subtracting([.dynamicType, .textClipped])) { issue in
+            print("AUDIT [Snooze] \(issue.auditType) — \(issue.compactDescription) — \(issue.element?.debugDescription.prefix(120) ?? "")")
+            return false
+        }
+    }
+
     // MARK: - Helpers
 
     /// Earlier tests aren't about the name: tap Not Now if the question is up.
