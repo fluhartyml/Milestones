@@ -73,6 +73,11 @@ final class MilestoneEntry {
     /// Which senses the user tagged on this entry
     var activeSenses: [String]
 
+    // MARK: - Feeling (TestFlight feedback, build 21)
+
+    /// The face picked to start the entry (Mood raw value). Optional: older entries have none.
+    var mood: String?
+
     // MARK: - Init
 
     init(

@@ -27,6 +27,15 @@ struct EntryDetailView: View {
             // MARK: - Core
 
             Section("Entry") {
+                // REM: The face picked to start the entry (his TestFlight feedback, build 21) — changeable here.
+                Picker("Feeling", selection: $entry.feeling) {
+                    Text("None").tag(Mood?.none)
+                    ForEach(Mood.allCases) { mood in
+                        Text("\(mood.emoji) \(mood.name)").tag(Optional(mood))
+                    }
+                }
+                .accessibilityIdentifier("entryFeeling")
+
                 TextField("Title", text: $entry.title)
 
                 DatePicker("Date", selection: $entry.eventDate, displayedComponents: [.date, .hourAndMinute])

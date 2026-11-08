@@ -15,28 +15,41 @@ struct TableOfContentsView: View {
 
     @State private var showingEntry = false
     @State private var activeEntry: MilestoneEntry?
+    // REM: HIS TESTFLIGHT FEEDBACK, build 21, 2026-11-08 06:43: the home page is "one button with an emoji and a plus
+    // REM: that asks how are you feeling" → the scale of faces (MoodPickerView) → the face picked starts the entry.
+    // REM: It replaces the toolbar "+"; the entry opens only after the faces sheet has closed (onDismiss), because
+    // REM: SwiftUI drops a cover presented while another sheet is still leaving.
+    @State private var showingFeelings = false
+    @State private var pickedMood: Mood?
+    @ScaledMetric(relativeTo: .title2) private var askSize: CGFloat = 24
+    @ScaledMetric(relativeTo: .largeTitle) private var faceSize: CGFloat = 40
 
     private let locationService = LocationService()
     private let weatherService = WeatherService()
 
     var body: some View {
         NavigationStack {
-            Group {
-                if entries.isEmpty {
-                    emptyState
-                } else {
-                    tocList
-                }
-            }
-            .navigationTitle("Contents")
-            .toolbar {
-                ToolbarItem(placement: .primaryAction) {
-                    Button {
-                        createNewEntry()
-                    } label: {
-                        Label("New Entry", systemImage: "plus")
+            VStack(spacing: 0) {
+                feelingButton
+                    .padding(.horizontal)
+                    .padding(.vertical, 12)
+                Group {
+                    if entries.isEmpty {
+                        emptyState
+                    } else {
+                        tocList
                     }
                 }
+                .frame(maxHeight: .infinity)
+            }
+            .navigationTitle("Contents")
+            .sheet(isPresented: $showingFeelings, onDismiss: {
+                if let mood = pickedMood {
+                    pickedMood = nil
+                    createNewEntry(mood: mood)
+                }
+            }) {
+                MoodPickerView { pickedMood = $0 }
             }
             .entryCover(isPresented: $showingEntry) {
                 if let entry = activeEntry {
@@ -75,6 +88,40 @@ struct TableOfContentsView: View {
 
     // MARK: - Subviews
 
+    /// The one button on the home page: a face with a plus, asking how you feel.
+    private var feelingButton: some View {
+        Button {
+            showingFeelings = true
+        } label: {
+            HStack(spacing: 16) {
+                Text("🙂")
+                    .font(.system(size: faceSize))
+                    .overlay(alignment: .bottomTrailing) {
+                        Image(systemName: "plus.circle.fill")
+                            .font(.system(size: faceSize * 0.45))
+                            .foregroundStyle(.white, .green)
+                            .offset(x: 6, y: 6)
+                    }
+                Text("How are you feeling?")
+                    .font(.system(size: askSize, weight: .semibold))
+                    .foregroundStyle(.primary)
+                    .multilineTextAlignment(.leading)
+                Spacer(minLength: 0)
+            }
+            .padding(20)
+            .frame(maxWidth: .infinity)
+            .background(RoundedRectangle(cornerRadius: 22).fill(Color.green.opacity(0.18)))
+            .contentShape(RoundedRectangle(cornerRadius: 22))
+        }
+        .buttonStyle(.plain)
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel("How are you feeling?")
+        .accessibilityHint("Pick a face to start a new entry")
+        .accessibilityAddTraits(.isButton)
+        .accessibilityIdentifier("newEntry")
+        .keyboardShortcut("n", modifiers: .command)
+    }
+
     private var tocList: some View {
         List {
             ForEach(groupedEntries, id: \.0) { section, sectionEntries in
@@ -95,6 +142,10 @@ struct TableOfContentsView: View {
 
     private func tocRow(_ entry: MilestoneEntry) -> some View {
         HStack(spacing: 10) {
+            if let feeling = entry.feeling {
+                Text(feeling.emoji)
+                    .accessibilityLabel(feeling.name)
+            }
             if entry.isMilestone {
                 Image(systemName: "star.fill")
                     .font(.caption)
@@ -133,11 +184,12 @@ struct TableOfContentsView: View {
 
     // MARK: - Actions
 
-    private func createNewEntry() {
+    private func createNewEntry(mood: Mood) {
         let entry = MilestoneEntry(
             eventDate: Date(),
             title: ""
         )
+        entry.feeling = mood
         modelContext.insert(entry)
 
         locationService.requestLocation()

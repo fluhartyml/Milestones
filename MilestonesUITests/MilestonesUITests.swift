@@ -216,6 +216,64 @@ final class MilestonesUITests: XCTestCase {
         print("BUILDSTAMP \(stamp.label)")
     }
 
+    /// His TestFlight feedback, build 21: Contents' one button asks how you feel, the faces open, a face starts the entry.
+    @MainActor
+    func test9_FeelingButtonStartsEntry() throws {
+        let app = XCUIApplication()
+        app.launch()
+        dismissAnyAppleAlert()
+        skipNameAsk(app)
+
+        let contentsTab = app.buttons["Contents"].firstMatch
+        XCTAssertTrue(contentsTab.waitForExistence(timeout: 5), "No Contents tab")
+        contentsTab.tap()
+
+        let ask = app.buttons["newEntry"]
+        XCTAssertTrue(ask.waitForExistence(timeout: 5), "No How are you feeling? button on Contents")
+        XCTAssertEqual(ask.label, "How are you feeling?")
+        attachScreenshot("Contents — feeling button")
+        ask.tap()
+
+        let good = app.buttons["mood_good"]
+        XCTAssertTrue(good.waitForExistence(timeout: 5), "The faces didn't open")
+        for mood in ["great", "good", "okay", "low", "awful"] {
+            XCTAssertTrue(app.buttons["mood_\(mood)"].exists, "No \(mood) face")
+        }
+        attachScreenshot("faces")
+        try app.performAccessibilityAudit(for: XCUIAccessibilityAuditType.all.subtracting([.dynamicType, .textClipped])) { issue in
+            // REM: EMOJI ARE PICTURES — his ruling 2026-11-08 10:2x: "yes treat the emoji as a picture". The audit
+            // REM: reads a yellow emoji face as low-contrast text; its colors can't change, and the word under each
+            // REM: face (black on white) is what names it. Only contrast, only on the five face buttons, is excused.
+            // The audit names the emoji itself, not always the button — match the button's ID, its word, or the emoji.
+            let names: Set<String> = ["Great", "Good", "Okay", "Low", "Awful", "😄", "🙂", "😐", "🙁", "😣"]
+            let element = issue.element
+            let face = (element?.identifier.hasPrefix("mood_") ?? false)
+                || names.contains(element?.label ?? "")
+                || (element?.label.unicodeScalars.first?.properties.isEmojiPresentation ?? false)
+            if issue.auditType == .contrast, face {
+                print("AUDIT [Faces] excused — emoji is a picture — \(issue.element?.identifier ?? "")")
+                return true
+            }
+            print("AUDIT [Faces] \(issue.auditType) — \(issue.compactDescription) — \(issue.element?.debugDescription.prefix(120) ?? "")")
+            return false
+        }
+        good.tap()
+
+        let feeling = app.descendants(matching: .any)["entryFeeling"].firstMatch
+        XCTAssertTrue(feeling.waitForExistence(timeout: 8), "Picking a face didn't open a new entry")
+        attachScreenshot("new entry with feeling")
+        XCTAssertTrue(app.buttons["Done"].firstMatch.exists, "No Done on the new entry")
+        app.buttons["Done"].firstMatch.tap()
+
+        // Cancel closes the faces without making an entry.
+        XCTAssertTrue(ask.waitForExistence(timeout: 5))
+        ask.tap()
+        let cancel = app.buttons["moodCancel"]
+        XCTAssertTrue(cancel.waitForExistence(timeout: 5), "No Cancel on the faces")
+        cancel.tap()
+        XCTAssertTrue(good.waitForNonExistence(timeout: 5), "Cancel didn't close the faces")
+    }
+
     // MARK: - Helpers
 
     /// Earlier tests aren't about the name: tap Not Now if the question is up.
