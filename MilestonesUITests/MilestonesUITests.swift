@@ -202,6 +202,20 @@ final class MilestonesUITests: XCTestCase {
         }
     }
 
+    /// Standing order #1: About shows the build number and commit.
+    @MainActor
+    func test8_AboutShowsBuild() throws {
+        let app = XCUIApplication()
+        app.launch()
+        dismissAnyAppleAlert()
+        skipNameAsk(app)
+        app.buttons["About"].firstMatch.tap()
+        let stamp = app.staticTexts["buildStamp"].firstMatch
+        XCTAssertTrue(stamp.waitForExistence(timeout: 5), "No build line on About")
+        XCTAssertTrue(stamp.label.contains("Build "), "Build line reads: \(stamp.label)")
+        print("BUILDSTAMP \(stamp.label)")
+    }
+
     // MARK: - Helpers
 
     /// Earlier tests aren't about the name: tap Not Now if the question is up.

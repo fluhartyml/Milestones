@@ -9,6 +9,7 @@ import SwiftUI
 
 /// About screen with credits, attributions, and compliance. Easter egg included.
 struct AboutView: View {
+    @ScaledMetric(relativeTo: .body) private var buildSize: CGFloat = 18
 
     var body: some View {
         NavigationStack {
@@ -30,9 +31,13 @@ struct AboutView: View {
                             .foregroundStyle(.secondary)
                             .multilineTextAlignment(.center)
 
-                        Text("v1.0")
-                            .font(.caption)
-                            .foregroundStyle(.tertiary)
+                        // REM: standing order #1 (his word): every build that reaches his devices shows its commit number.
+                        // Milestones had no in-app build line until 2026-11-07 (BuildStamp.swift, set by stamp-build.sh).
+                        Text(BuildStamp.summary)
+                            .font(.system(size: buildSize))
+                            .foregroundStyle(.secondary)
+                            .multilineTextAlignment(.center)
+                            .accessibilityIdentifier("buildStamp")
                     }
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 12)
