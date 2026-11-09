@@ -121,6 +121,8 @@ enum ReminderService {
         let old = await center.pendingNotificationRequests().map(\.identifier).filter { $0.hasPrefix(followUpPrefix) || $0 == identifier }
         center.removePendingNotificationRequests(withIdentifiers: old)
         if written { center.removePendingNotificationRequests(withIdentifiers: [snoozedID]) }
+        // REM: B-032.3 — Nagging's alarms are rebuilt with the reminder (NaggingAlarms.swift); off or written = none.
+        await rebuildNagging(on: on, hour: hour, minute: minute, written: written)
         guard on else { center.removePendingNotificationRequests(withIdentifiers: [snoozedID]); return }
 
         // The daily reminder itself, every day.
@@ -143,6 +145,15 @@ enum ReminderService {
                                                             content: content(snoozed: false), trigger: trigger))
             }
         }
+    }
+
+    private static func rebuildNagging(on: Bool, hour: Int, minute: Int, written: Bool) async {
+        #if os(iOS)
+        if #available(iOS 26.0, *) {
+            let start = on && persistent ? Calendar.current.date(bySettingHour: hour, minute: minute, second: 0, of: .now) : nil
+            await NaggingAlarms.rebuild(reminderAt: start, writtenToday: written)
+        }
+        #endif
     }
 
     /// Kept for Settings: the switch and time call this.

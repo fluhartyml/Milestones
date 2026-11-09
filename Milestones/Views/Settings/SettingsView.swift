@@ -170,6 +170,10 @@ struct SettingsView: View {
                             Text("Snooze").font(.system(size: bodySize))
                         }
                         .accessibilityIdentifier("reminderSnooze")
+                        // REM: B-032.2 / 032.3 — Nagging below Snooze, iPhone and iPad on iOS 26+ (AlarmKit).
+                        #if os(iOS)
+                        if #available(iOS 26.0, *) { NaggingSection() }
+                        #endif
                     }
                 }
                 if notificationsOff {
