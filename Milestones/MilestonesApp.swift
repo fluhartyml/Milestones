@@ -21,6 +21,8 @@ struct MilestonesApp: App {
         if ProcessInfo.processInfo.arguments.contains("-UITestFreshStart") {
             UserDefaults.standard.removeObject(forKey: UserNameKeys.name)
             UserDefaults.standard.removeObject(forKey: UserNameKeys.asked)
+            UserDefaults.standard.removeObject(forKey: JournalLockKeys.asked)
+            UserDefaults.standard.removeObject(forKey: JournalLockKeys.on)
         }
         #endif
     }

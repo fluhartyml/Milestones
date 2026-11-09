@@ -123,6 +123,16 @@ final class MilestonesUITests: XCTestCase {
         app.buttons["nameContinue"].tap()
         XCTAssertTrue(field.waitForNonExistence(timeout: 5), "Name question didn't close")
 
+        // REM: line 010.2 — the lock card comes next; check it, pass Apple's audit, then Not Now.
+        XCTAssertTrue(app.buttons["lockOn"].waitForExistence(timeout: 5), "No lock card after the name")
+        attachScreenshot("lock card")
+        try app.performAccessibilityAudit(for: XCUIAccessibilityAuditType.all.subtracting([.dynamicType, .textClipped])) { issue in
+            print("AUDIT [Lock card] \(issue.auditType) — \(issue.compactDescription) — \(issue.element?.debugDescription.prefix(120) ?? "")")
+            return false
+        }
+        app.buttons["lockSkip"].tap()
+        XCTAssertTrue(app.buttons["lockOn"].waitForNonExistence(timeout: 5), "Lock card didn't close on Not Now")
+
         let journalTab = app.buttons["Journal"].firstMatch
         XCTAssertTrue(journalTab.waitForExistence(timeout: 5), "No Journal tab")
         journalTab.tap()
@@ -280,6 +290,14 @@ final class MilestonesUITests: XCTestCase {
     @MainActor
     private func skipNameAsk(_ app: XCUIApplication) {
         let skip = app.buttons["nameSkip"]
+        if skip.waitForExistence(timeout: 3) { skip.tap() }
+        skipLockOffer(app)
+    }
+
+    /// Line 010.2: the lock card follows the name — Not Now, unless a test is about the lock.
+    @MainActor
+    private func skipLockOffer(_ app: XCUIApplication) {
+        let skip = app.buttons["lockSkip"]
         if skip.waitForExistence(timeout: 3) { skip.tap() }
     }
 

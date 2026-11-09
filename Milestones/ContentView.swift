@@ -13,6 +13,8 @@ struct ContentView: View {
 
     // REM: line 002.1 — the name is asked once, at first launch, over the journal (NameAskView).
     @AppStorage(UserNameKeys.asked) private var askedForName = false
+    // REM: line 010.2 — the lock is offered right after the name, once (JournalLock.swift).
+    @AppStorage(JournalLockKeys.asked) private var askedForLock = false
     @Environment(\.scenePhase) private var scenePhase
 
     var body: some View {
@@ -20,6 +22,11 @@ struct ContentView: View {
             .sheet(isPresented: Binding(get: { !askedForName }, set: { _ in })) {
                 NameAskView()
             }
+            .sheet(isPresented: Binding(get: { askedForName && !askedForLock }, set: { _ in })) {
+                LockOfferView()
+            }
+            // REM: line 010.1 — the journal hides when you leave and opens with Face ID (JournalLock.swift).
+            .journalLock()
             // REM: line 032.2 — the reminder's repeats are rebuilt each time you come back (a new day, a written entry).
             .onChange(of: scenePhase) { _, phase in
                 if phase == .active { Task { await ReminderService.refresh() } }
