@@ -58,6 +58,13 @@ struct JournalTimelineView: View {
             }
             .navigationTitle("Journal")
             .toolbar {
+                // REM: amber A-023 / A-023.2 — the badge patches (Badges.swift).
+                ToolbarItem(placement: .navigation) {
+                    NavigationLink { JournalBadgesScreen() } label: {
+                        Label("Badges", systemImage: "rosette")
+                    }
+                    .accessibilityIdentifier("badgesButton")
+                }
                 ToolbarItem(placement: .primaryAction) {
                     Button {
                         createNewEntry()
@@ -66,6 +73,7 @@ struct JournalTimelineView: View {
                     }
                 }
             }
+            .modifier(JournalBadgeWatcher(entries: entries))
             .entryCover(isPresented: $showingEntry) {
                 if let entry = activeEntry {
                     NavigationStack {
