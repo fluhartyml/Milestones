@@ -18,6 +18,15 @@ struct JournalTimelineView: View {
     @AppStorage(UserNameKeys.name) private var userName = ""
     @ScaledMetric(relativeTo: .title3) private var greetingSize: CGFloat = 22
     @State private var activeEntry: MilestoneEntry?
+    /// REM: lines 007 / 022.1 — the day ring tapped (WritingRings.swift); nil = every entry.
+    @State private var selectedDay: Date?
+
+    /// The days you wrote an entry (by when it was written, not the day it's about).
+    private var writtenDays: Set<Date> { Set(entries.map { Calendar.current.startOfDay(for: $0.createdAt) }) }
+    private var shownEntries: [MilestoneEntry] {
+        guard let day = selectedDay else { return entries }
+        return entries.filter { Calendar.current.isDate($0.createdAt, inSameDayAs: day) }
+    }
 
     private let locationService = LocationService()
     private let weatherService = WeatherService()
@@ -32,15 +41,20 @@ struct JournalTimelineView: View {
                 }
             }
             .safeAreaInset(edge: .top, spacing: 0) {
-                if !userName.isEmpty {
-                    Text("Hello, \(userName)")
-                        .font(.system(size: greetingSize, weight: .semibold))
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .padding(.horizontal)
-                        .padding(.vertical, 8)
-                        .accessibilityAddTraits(.isHeader)
-                        .accessibilityIdentifier("greeting")
+                VStack(spacing: 0) {
+                    if !userName.isEmpty {
+                        Text("Hello, \(userName)")
+                            .font(.system(size: greetingSize, weight: .semibold))
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .padding(.horizontal)
+                            .padding(.vertical, 8)
+                            .accessibilityAddTraits(.isHeader)
+                            .accessibilityIdentifier("greeting")
+                    }
+                    // REM: lines 007 / 022 / 022.1 — the week of writing rings and the month's ring.
+                    WritingRings(writtenDays: writtenDays, selectedDay: $selectedDay)
                 }
+                .background(.bar)
             }
             .navigationTitle("Journal")
             .toolbar {
@@ -76,7 +90,7 @@ struct JournalTimelineView: View {
 
     private var entryList: some View {
         List {
-            ForEach(entries) { entry in
+            ForEach(shownEntries) { entry in
                 Button {
                     activeEntry = entry
                     showingEntry = true
@@ -126,7 +140,7 @@ struct JournalTimelineView: View {
     private func deleteEntries(offsets: IndexSet) {
         withAnimation {
             for index in offsets {
-                modelContext.delete(entries[index])
+                modelContext.delete(shownEntries[index])
             }
         }
     }
