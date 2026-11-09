@@ -133,6 +133,16 @@ final class MilestonesUITests: XCTestCase {
         app.buttons["lockSkip"].tap()
         XCTAssertTrue(app.buttons["lockOn"].waitForNonExistence(timeout: 5), "Lock card didn't close on Not Now")
 
+        // REM: amber B-031 — the Microphone card follows the lock card; check it, pass Apple's audit, then Not Now.
+        XCTAssertTrue(app.buttons["micOn"].waitForExistence(timeout: 5), "No Microphone card after the lock card")
+        attachScreenshot("microphone card")
+        try app.performAccessibilityAudit(for: XCUIAccessibilityAuditType.all.subtracting([.dynamicType, .textClipped])) { issue in
+            print("AUDIT [Microphone card] \(issue.auditType) — \(issue.compactDescription) — \(issue.element?.debugDescription.prefix(120) ?? "")")
+            return false
+        }
+        app.buttons["micSkip"].tap()
+        XCTAssertTrue(app.buttons["micOn"].waitForNonExistence(timeout: 5), "Microphone card didn't close on Not Now")
+
         let journalTab = app.buttons["Journal"].firstMatch
         XCTAssertTrue(journalTab.waitForExistence(timeout: 5), "No Journal tab")
         journalTab.tap()
@@ -299,6 +309,9 @@ final class MilestonesUITests: XCTestCase {
     private func skipLockOffer(_ app: XCUIApplication) {
         let skip = app.buttons["lockSkip"]
         if skip.waitForExistence(timeout: 3) { skip.tap() }
+        // Amber B-031: the Microphone card follows the lock card.
+        let micSkip = app.buttons["micSkip"]
+        if micSkip.waitForExistence(timeout: 3) { micSkip.tap() }
     }
 
     @MainActor

@@ -20,6 +20,8 @@ struct ComposeEntryView: View {
     @State private var bodyText = ""
     @State private var eventDate = Date()
     @State private var isMilestone = false
+    // REM: amber B-031 — a note, a photo and a voice memo together on one entry.
+    @State private var voiceMemo: Data?
 
     // MARK: - Senses
 
@@ -60,6 +62,8 @@ struct ComposeEntryView: View {
                     TextField("Write about this moment...", text: $bodyText, axis: .vertical)
                         .lineLimit(4...12)
                 }
+
+                VoiceMemoSection(memo: $voiceMemo, text: $bodyText)
 
                 // MARK: - Senses Section
 
@@ -143,6 +147,8 @@ struct ComposeEntryView: View {
             body: bodyText,
             isMilestone: isMilestone
         )
+
+        entry.voiceMemo = voiceMemo
 
         // Senses
         entry.activeSenses = activeSenses.map(\.rawValue)

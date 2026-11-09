@@ -23,6 +23,7 @@ struct MilestonesApp: App {
             UserDefaults.standard.removeObject(forKey: UserNameKeys.asked)
             UserDefaults.standard.removeObject(forKey: JournalLockKeys.asked)
             UserDefaults.standard.removeObject(forKey: JournalLockKeys.on)
+            UserDefaults.standard.removeObject(forKey: MicrophoneAccess.askedKey)
         }
         #endif
     }

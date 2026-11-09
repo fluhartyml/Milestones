@@ -113,6 +113,9 @@ struct SettingsView: View {
 
             reminderSection
 
+            // REM: amber B-031 — Access Microphone, for voice memos (MicrophoneAccessViews.swift).
+            MicrophoneSection()
+
             // REM: line 010.2 — "the revoking option in settings" (JournalLock.swift).
             JournalLockSection()
         }

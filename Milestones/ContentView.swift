@@ -15,6 +15,8 @@ struct ContentView: View {
     @AppStorage(UserNameKeys.asked) private var askedForName = false
     // REM: line 010.2 — the lock is offered right after the name, once (JournalLock.swift).
     @AppStorage(JournalLockKeys.asked) private var askedForLock = false
+    // REM: amber B-031 — the Microphone card follows the lock card, once (MicrophoneOfferView).
+    @AppStorage(MicrophoneAccess.askedKey) private var askedForMicrophone = false
     @Environment(\.scenePhase) private var scenePhase
 
     var body: some View {
@@ -24,6 +26,9 @@ struct ContentView: View {
             }
             .sheet(isPresented: Binding(get: { askedForName && !askedForLock }, set: { _ in })) {
                 LockOfferView()
+            }
+            .sheet(isPresented: Binding(get: { askedForName && askedForLock && !askedForMicrophone }, set: { _ in })) {
+                MicrophoneOfferView()
             }
             // REM: line 010.1 — the journal hides when you leave and opens with Face ID (JournalLock.swift).
             .journalLock()

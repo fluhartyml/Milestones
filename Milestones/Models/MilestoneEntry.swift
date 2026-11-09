@@ -65,6 +65,12 @@ final class MilestoneEntry {
     @Attribute(.externalStorage)
     var tastePhoto: Data?
 
+    // MARK: - Voice Memo (amber B-031)
+
+    /// The voice memo, an .m4a file's bytes. Optional: older entries have none (a lightweight migration).
+    @Attribute(.externalStorage)
+    var voiceMemo: Data?
+
     // MARK: - Index / Milestone (1.0.5, 4.1)
 
     /// Whether this entry has been promoted to a milestone in the index

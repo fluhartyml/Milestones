@@ -44,6 +44,8 @@ struct EntryDetailView: View {
                     .lineLimit(4...20)
             }
 
+            VoiceMemoSection(memo: $entry.voiceMemo, text: $entry.body)
+
             // MARK: - Filing Stamp
 
             Section {
