@@ -49,16 +49,19 @@ enum SenseIndex {
     static func senses(from entries: [MilestoneEntry], bar: [SenseButton]) -> [SenseIndexItem] {
         var collector = Collector()
         for entry in entries {
+            // REM: MF-001 / MF-005, his words: "There are only five senses" — anything stored under the retired
+            // Balance / Body ids is listed under Touch (SenseType.shownID); the stored ids are left as they are.
             for raw in entry.activeSenses {
-                if let sense = SenseType(rawValue: raw) { collector.add(sense.rawValue, sense.displayName, sense.icon, entry) }
+                if let sense = SenseType(stored: raw) { collector.add(sense.rawValue, sense.displayName, sense.icon, entry) }
             }
             for addendum in entry.addenda ?? [] {
-                collector.add(addendum.sense, addendum.senseName, addendum.glyph, entry)
+                collector.add(SenseType.shownID(addendum.sense), addendum.shownSenseName, addendum.shownGlyph, entry)
             }
             for sticker in entry.stickers ?? [] {
-                let button = bar.first { $0.id == sticker.sense }
-                collector.add(sticker.sense, button?.name ?? sticker.senseName,
-                              button?.glyph ?? SenseType(rawValue: sticker.sense)?.icon ?? "sparkles", entry)
+                let id = SenseType.shownID(sticker.sense)
+                let button = bar.first { $0.id == id }
+                collector.add(id, button?.name ?? sticker.shownSenseName,
+                              button?.glyph ?? SenseType(stored: sticker.sense)?.icon ?? "sparkles", entry)
             }
         }
         let known = bar.map(\.id) + SenseType.allCases.map(\.rawValue)
@@ -165,7 +168,7 @@ struct SenseIndexEntriesView: View {
                 EntryDetailView(entry: entry)
             } label: {
                 VStack(alignment: .leading, spacing: 4) {
-                    Text(entry.title.isEmpty ? "Entry" : entry.title)
+                    Text(entry.displayTitle)
                         .font(.system(size: bodySize, weight: .semibold))
                     Text(entry.eventDate.formatted(date: .abbreviated, time: .shortened))
                         .font(.system(size: bodySize))

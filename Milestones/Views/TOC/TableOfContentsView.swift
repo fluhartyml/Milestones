@@ -154,7 +154,8 @@ struct TableOfContentsView: View {
                     .font(.system(size: rowSize))
                     .foregroundStyle(.secondary)
 
-                Text(entry.title.isEmpty ? "Untitled" : entry.title)
+                // REM: MF-004, his words: "Should never be an 'untitled' entry" — the shown title comes from the entry.
+                Text(entry.displayTitle)
                     .font(.system(size: rowSize, weight: .semibold))
                     .lineLimit(1)
             }

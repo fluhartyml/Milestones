@@ -23,7 +23,8 @@ struct EntryRowView: View {
                 .foregroundStyle(.secondary)
 
             // Title
-            Text(entry.title.isEmpty ? "Entry" : entry.title)
+            // REM: MF-004, his words: "Should never be an 'untitled' entry" — the shown title comes from the entry.
+            Text(entry.displayTitle)
                 .font(.system(size: headingSize, weight: .semibold))
                 .lineLimit(1)
 
@@ -45,7 +46,8 @@ struct EntryRowView: View {
 
                 if let location = entry.locationName {
                     HStack(spacing: 2) {
-                        Image(systemName: "location.fill")
+                        // REM: MF-005, his words: "Should be a location pin" — a map pin, not the location arrow.
+                        Image(systemName: "mappin")
                             .font(.caption2)
                         Text(location)
                             .font(.caption2)

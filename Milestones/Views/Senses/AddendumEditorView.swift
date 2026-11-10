@@ -57,7 +57,7 @@ struct AddendumEditorView: View {
 
     init(entry: MilestoneEntry, addendum: Addendum) {
         self.entry = entry
-        self.sense = SenseButton(id: addendum.sense, name: addendum.senseName, glyph: addendum.glyph)
+        self.sense = SenseButton(id: addendum.sense, name: addendum.shownSenseName, glyph: addendum.shownGlyph)
         self.startTool = nil
         self.existing = addendum
     }

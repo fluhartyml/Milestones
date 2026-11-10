@@ -14,7 +14,7 @@ struct SenseIconsView: View {
     var body: some View {
         HStack(spacing: 4) {
             ForEach(activeSenses, id: \.self) { sense in
-                if let senseType = SenseType(rawValue: sense) {
+                if let senseType = SenseType(stored: sense) {
                     Image(systemName: senseType.icon)
                         .font(.caption2)
                         .foregroundStyle(.secondary)

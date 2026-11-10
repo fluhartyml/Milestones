@@ -95,7 +95,9 @@ final class SenseBarStore {
         let defaults = UserDefaults.standard
         if let data = defaults.data(forKey: Self.buttonsKey),
            let saved = try? JSONDecoder().decode([SenseButton].self, from: data) {
-            buttons = saved
+            // REM: MF-001, his words: "There are only five senses" — a Balance / Body button saved by an older build
+            // never comes back on the bar. Senses you made yourself ("custom-…") are kept.
+            buttons = saved.filter { SenseType.retiredIDs[$0.id] == nil }
         } else {
             buttons = Self.fiveSenses
         }

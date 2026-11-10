@@ -49,3 +49,19 @@ final class Addendum {
         self.createdAt = Date()
     }
 }
+
+extension Addendum {
+    // REM: MF-001 / MF-005, his words: "There are only five senses" — an addendum stored under a retired sense
+    // (Balance / Body) still opens with everything in it; it just reads as Touch. The stored fields are not changed.
+    /// The sense name shown on the card ("Touch" for the retired Balance / Body).
+    var shownSenseName: String {
+        if SenseType(rawValue: sense) == nil, let folded = SenseType(stored: sense) { return folded.displayName }
+        return senseName
+    }
+
+    /// The glyph shown on the card (Touch's hand for the retired Balance / Body).
+    var shownGlyph: String {
+        if SenseType(rawValue: sense) == nil, let folded = SenseType(stored: sense) { return folded.icon }
+        return glyph
+    }
+}

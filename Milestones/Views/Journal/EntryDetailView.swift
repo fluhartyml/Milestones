@@ -20,6 +20,9 @@ struct EntryDetailView: View {
     @State private var smellPhotoItem: PhotosPickerItem?
     @State private var tastePhotoItem: PhotosPickerItem?
 
+    // REM: MF-007, his words: "Why is hearing greyed out? It should have audio recording" — the old seven-tile grid
+    // (SensePicker, which grayed out Hearing) and the unused compose sheet that held it are deleted; Hearing's tile in
+    // its sense sheet is the microphone (SenseButton.tools), never gray.
     // REM: the old sense tiles (SensePicker) are gone — the senses bar replaces them (no duplicate UI). Entries
     // written with them keep what they hold: their Sight / Touch / Smell / Taste boxes still show when they have
     // something in them. Worked out once when the screen opens, so a box doesn't vanish while you clear it.
@@ -93,9 +96,10 @@ struct EntryDetailView: View {
         .sheet(isPresented: $editingSenses) {
             SenseEditorView()
         }
-        // REM: F-M3: "the title bar shows the entry's own title instead of 'Entry', and it changes as you type ...
-        // Empty ... the bar falls back to 'Entry'."
-        .navigationTitle(entry.title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? "Entry" : entry.title)
+        // REM: F-M3: "the title bar shows the entry's own title instead of 'Entry', and it changes as you type".
+        // REM: MF-004, his words: "Should never be an 'untitled' entry" / "the user gives so much information there is
+        // no reason to leave an untitled entry" — empty, the bar shows a title made from the entry (displayTitle).
+        .navigationTitle(entry.displayTitle)
         #if os(iOS)
         .navigationBarTitleDisplayMode(.inline)
         #endif
@@ -345,19 +349,19 @@ struct EntryDetailView: View {
     private func addendumCard(_ addendum: Addendum) -> some View {
         let heading = addendum.title.trimmingCharacters(in: .whitespacesAndNewlines)
         return HStack(alignment: .firstTextBaseline, spacing: 12) {
-            Image(systemName: addendum.glyph.isEmpty ? "sparkles" : addendum.glyph)
+            Image(systemName: addendum.shownGlyph.isEmpty ? "sparkles" : addendum.shownGlyph)
                 .font(.system(size: glyphSize))
                 .foregroundStyle(Color.accentColor)
                 .accessibilityHidden(true)
             VStack(alignment: .leading, spacing: 2) {
-                Text(heading.isEmpty ? addendum.senseName : heading)
+                Text(heading.isEmpty ? addendum.shownSenseName : heading)
                     .font(.system(size: headingSize, weight: .semibold))
                     .foregroundStyle(.primary)
                 // F-M1 mockup: "Hearing · 0:42" under a recording.
                 let length = addendum.audio != nil && addendum.audioSeconds > 0
                     ? " · " + VoiceMemoRecorder.clock(addendum.audioSeconds) : ""
                 if !heading.isEmpty || !length.isEmpty {
-                    Text(addendum.senseName + length)
+                    Text(addendum.shownSenseName + length)
                         .font(.system(size: bodySize))
                         .foregroundStyle(.secondary)
                 }
@@ -467,7 +471,8 @@ struct EntryDetailView: View {
                                                                 latitudinalMeters: 1500,
                                                                 longitudinalMeters: 1500)),
                     interactionModes: []) {
-                    Marker(entry.locationName ?? "Location", coordinate: spot)
+                    // REM: MF-005, his words: "Should be a location pin" — a red map pin marker.
+                    Marker(entry.locationName ?? "Location", systemImage: "mappin", coordinate: spot)
                 }
                 .id("\(latitude),\(longitude)")
                 .frame(height: mapHeight)

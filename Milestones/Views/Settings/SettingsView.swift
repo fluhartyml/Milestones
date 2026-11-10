@@ -66,7 +66,8 @@ struct SettingsView: View {
                     Label {
                         Text("Location").font(.system(size: headingSize, weight: .semibold))
                     } icon: {
-                        Image(systemName: "location.fill").foregroundStyle(.tint)
+                        // REM: MF-005, his words: "Should be a location pin" — a map pin, not the location arrow.
+                        Image(systemName: "mappin.and.ellipse").foregroundStyle(.tint)
                     }
 
                     Text("Milestones uses your location to mark where each entry was written and to add the local weather.")

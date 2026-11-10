@@ -130,7 +130,8 @@ extension MilestoneEntry {
         let formatter = DateFormatter()
         formatter.dateFormat = "yyyy MMM dd HHmm"
         let stamp = formatter.string(from: eventDate).uppercased()
-        return "\(stamp) \(title)"
+        // REM: MF-004 "Should never be an 'untitled' entry" — the filing name uses the shown title too.
+        return "\(stamp) \(displayTitle)"
     }
 
     /// Whether this entry has any weather data
@@ -156,8 +157,10 @@ extension MilestoneEntry {
     /// Every sense this entry used: the old sense tiles, its addenda, its stickers (rows and the Index read this).
     var senseIDsUsed: [String] {
         var seen: [String] = []
-        for id in activeSenses + sortedAddenda.map(\.sense) + sortedStickers.map(\.sense)
-        where !id.isEmpty && !seen.contains(id) {
+        // REM: MF-001 "There are only five senses" — the retired Balance / Body ids are counted as Touch.
+        for raw in activeSenses + sortedAddenda.map(\.sense) + sortedStickers.map(\.sense) {
+            let id = SenseType.shownID(raw)
+            guard !id.isEmpty, !seen.contains(id) else { continue }
             seen.append(id)
         }
         return seen
@@ -169,5 +172,68 @@ extension MilestoneEntry {
         if smellPhoto != nil { return true }
         if tastePhoto != nil { return true }
         return false
+    }
+}
+
+// MARK: - Display title (MF-004)
+
+extension MilestoneEntry {
+    // REM: MF-004, his words (TestFlight build 30): "Should never be an 'untitled' entry" / "the user gives so much
+    // information there is no reason to leave an untitled entry". The title you write always wins. Empty, the title
+    // shown is worked out from what the entry has, in his order: the first words of the entry text; else its sticker
+    // names or first addendum title; else the senses it used; else its town and the day ("Surfside Beach, Monday").
+    // The stored title is never written — this is only what is shown (rows, the title bar, the Index).
+    /// The title to show: yours, or one made from what the entry holds. Never "Untitled".
+    var displayTitle: String {
+        let own = title.trimmingCharacters(in: .whitespacesAndNewlines)
+        if !own.isEmpty { return own }
+
+        // 1. The entry text (and what older entries wrote in the old Touch / Smell / Taste boxes).
+        for words in [body, touchDescription ?? "", smellDescription ?? "", tasteDescription ?? ""] {
+            if let opening = Self.openingWords(of: words) { return opening }
+        }
+
+        // 2. Sticker names, else the first addendum title (else the first words of an addendum).
+        var stickerNames: [String] = []
+        for sticker in sortedStickers {
+            let name = sticker.name.trimmingCharacters(in: .whitespacesAndNewlines)
+            if !name.isEmpty && !stickerNames.contains(name) { stickerNames.append(name) }
+        }
+        if !stickerNames.isEmpty { return Array(stickerNames.prefix(3)).formatted(.list(type: .and)) }
+        for addendum in sortedAddenda {
+            let heading = addendum.title.trimmingCharacters(in: .whitespacesAndNewlines)
+            if !heading.isEmpty { return heading }
+        }
+        for addendum in sortedAddenda {
+            if let opening = Self.openingWords(of: addendum.text) { return opening }
+        }
+
+        // 3. The senses it used.
+        var senseNames: [String] = []
+        for id in senseIDsUsed {
+            let name = SenseType(stored: id)?.displayName
+                ?? sortedAddenda.first { $0.sense == id }?.senseName
+                ?? sortedStickers.first { $0.sense == id }?.senseName
+                ?? ""
+            if !name.isEmpty && !senseNames.contains(name) { senseNames.append(name) }
+        }
+        if !senseNames.isEmpty { return senseNames.formatted(.list(type: .and)) }
+
+        // 4. The town and the day ("Surfside Beach, Monday"); with no town, the day and date.
+        let day = eventDate.formatted(.dateTime.weekday(.wide))
+        if let town = locationName?.split(separator: ",").first?.trimmingCharacters(in: .whitespaces), !town.isEmpty {
+            return "\(town), \(day)"
+        }
+        // REM: MF-004 — no words, glyphs, senses or town: the day and date still name it (never "Untitled").
+        return eventDate.formatted(.dateTime.weekday(.wide).month(.wide).day())
+    }
+
+    /// The first line of some writing, cut to its first eight words. Nil when there is nothing written.
+    private static func openingWords(of writing: String) -> String? {
+        guard let line = writing.split(whereSeparator: \.isNewline)
+            .map({ $0.trimmingCharacters(in: .whitespaces) })
+            .first(where: { !$0.isEmpty }) else { return nil }
+        let words = line.split(whereSeparator: \.isWhitespace)
+        return words.count > 8 ? words.prefix(8).joined(separator: " ") : line
     }
 }

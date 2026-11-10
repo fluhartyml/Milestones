@@ -88,7 +88,8 @@ struct AboutView: View {
                     .padding(.vertical, 4)
 
                     attributionRow(
-                        icon: "location.fill",
+                        // REM: MF-005, his words: "Should be a location pin".
+                        icon: "mappin.and.ellipse",
                         title: "Apple CoreLocation",
                         detail: "Location services provided by Apple CoreLocation.",
                         footnote: "Geotag and reverse geocoding for every journal entry."

@@ -38,3 +38,12 @@ final class EntrySticker {
         self.createdAt = Date()
     }
 }
+
+extension EntrySticker {
+    // REM: MF-001, his words: "There are only five senses" — a sticker stored under Balance / Body reads as Touch.
+    /// The sense name shown for this sticker ("Touch" for the retired Balance / Body).
+    var shownSenseName: String {
+        if SenseType(rawValue: sense) == nil, let folded = SenseType(stored: sense) { return folded.displayName }
+        return senseName
+    }
+}
