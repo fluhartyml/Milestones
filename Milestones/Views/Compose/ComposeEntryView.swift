@@ -19,7 +19,6 @@ struct ComposeEntryView: View {
     @State private var title = ""
     @State private var bodyText = ""
     @State private var eventDate = Date()
-    @State private var isMilestone = false
     // REM: amber B-031 — a note, a photo and a voice memo together on one entry.
     @State private var voiceMemo: Data?
 
@@ -109,14 +108,7 @@ struct ComposeEntryView: View {
                     }
                 }
 
-                // MARK: - Milestone Toggle (1.0.18)
-
-                Section {
-                    Toggle(isOn: $isMilestone) {
-                        Label("Add as Significant to Appendix", systemImage: "star.fill")
-                    }
-                    .tint(.orange)
-                }
+                // REM: amber B-183.8 — the "Add as Significant to Appendix" star toggle is gone with the Appendix.
             }
             .navigationTitle("New Entry")
             #if os(iOS)
@@ -144,8 +136,7 @@ struct ComposeEntryView: View {
         let entry = MilestoneEntry(
             eventDate: eventDate,
             title: title,
-            body: bodyText,
-            isMilestone: isMilestone
+            body: bodyText
         )
 
         entry.voiceMemo = voiceMemo

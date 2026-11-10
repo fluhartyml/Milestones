@@ -91,6 +91,12 @@ final class MilestoneEntry {
     @Relationship(deleteRule: .cascade, inverse: \Addendum.entry)
     var addenda: [Addendum]? = []
 
+    // MARK: - Stickers (amber B-183.7.3)
+
+    /// Glyphs stamped on the entry like stickers. Optional with a default (lightweight migration); deleted with the entry.
+    @Relationship(deleteRule: .cascade, inverse: \EntrySticker.entry)
+    var stickers: [EntrySticker]? = []
+
     // MARK: - Init
 
     init(
@@ -133,6 +139,21 @@ extension MilestoneEntry {
     /// The addenda in the order they were added (B-183.2: "New ones add at the bottom of this block", F-M1 model).
     var sortedAddenda: [Addendum] {
         (addenda ?? []).sorted { $0.createdAt < $1.createdAt }
+    }
+
+    /// The stickers, oldest first, so a newer one sits on top.
+    var sortedStickers: [EntrySticker] {
+        (stickers ?? []).sorted { $0.createdAt < $1.createdAt }
+    }
+
+    /// Every sense this entry used: the old sense tiles, its addenda, its stickers (rows and the Index read this).
+    var senseIDsUsed: [String] {
+        var seen: [String] = []
+        for id in activeSenses + sortedAddenda.map(\.sense) + sortedStickers.map(\.sense)
+        where !id.isEmpty && !seen.contains(id) {
+            seen.append(id)
+        }
+        return seen
     }
 
     /// Whether this entry has any photos attached

@@ -116,6 +116,12 @@ struct SettingsView: View {
             // REM: amber B-031 — Access Microphone, for voice memos (MicrophoneAccessViews.swift).
             MicrophoneSection()
 
+            // REM: amber B-183.7.1 — the Take Picture tile uses the camera, so Access Camera (his every-permission rule).
+            // iPhone and iPad only; the Mac and Vision Pro pick a photo instead (CameraAccessViews.swift).
+            #if os(iOS)
+            CameraSection()
+            #endif
+
             // REM: line 010.2 — "the revoking option in settings" (JournalLock.swift).
             JournalLockSection()
         }

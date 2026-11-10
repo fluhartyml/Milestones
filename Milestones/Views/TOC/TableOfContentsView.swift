@@ -23,6 +23,7 @@ struct TableOfContentsView: View {
     @State private var pickedMood: Mood?
     @ScaledMetric(relativeTo: .title2) private var askSize: CGFloat = 24
     @ScaledMetric(relativeTo: .largeTitle) private var faceSize: CGFloat = 40
+    @ScaledMetric(relativeTo: .body) private var rowSize: CGFloat = 18
 
     private let locationService = LocationService()
     private let weatherService = WeatherService()
@@ -146,26 +147,22 @@ struct TableOfContentsView: View {
                 Text(feeling.emoji)
                     .accessibilityLabel(feeling.name)
             }
-            if entry.isMilestone {
-                Image(systemName: "star.fill")
-                    .font(.caption)
-                    .foregroundStyle(.orange)
-            }
-
+            // REM: amber B-183.8 — the star is off list rows (the Appendix is gone; isMilestone stays stored).
+            // F-M2, "yes drop it" — the gray "2026 NOV 07 0933" stamp is gone; the date is in words.
             VStack(alignment: .leading, spacing: 2) {
-                Text(entry.eventDate.filingStamp)
-                    .font(.caption.monospaced())
+                Text(entry.eventDate.formatted(.dateTime.weekday(.abbreviated).month(.abbreviated).day().hour().minute()))
+                    .font(.system(size: rowSize))
                     .foregroundStyle(.secondary)
 
                 Text(entry.title.isEmpty ? "Untitled" : entry.title)
-                    .font(.subheadline)
+                    .font(.system(size: rowSize, weight: .semibold))
                     .lineLimit(1)
             }
 
             Spacer()
 
-            if !entry.activeSenses.isEmpty {
-                Text("\(entry.activeSenses.count)")
+            if !entry.senseIDsUsed.isEmpty {
+                Text("\(entry.senseIDsUsed.count)")
                     .font(.caption2.bold())
                     .foregroundStyle(.white)
                     .frame(width: 20, height: 20)

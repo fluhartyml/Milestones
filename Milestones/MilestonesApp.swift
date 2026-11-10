@@ -33,6 +33,8 @@ struct MilestonesApp: App {
             MilestoneEntry.self,
             // REM: amber B-183.2 — addenda (sub-entries), new in this build; optional, so older stores open unchanged.
             Addendum.self,
+            // REM: amber B-183.7.3 — glyphs stamped on an entry like stickers; optional, so older stores open unchanged.
+            EntrySticker.self,
         ])
         let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
 

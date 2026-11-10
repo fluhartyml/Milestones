@@ -20,9 +20,22 @@ struct EntryDetailView: View {
     @State private var smellPhotoItem: PhotosPickerItem?
     @State private var tastePhotoItem: PhotosPickerItem?
 
-    // Track which senses are active
-    @State private var activeSenses: Set<SenseType> = []
+    // REM: the old sense tiles (SensePicker) are gone — the senses bar replaces them (no duplicate UI). Entries
+    // written with them keep what they hold: their Sight / Touch / Smell / Taste boxes still show when they have
+    // something in them. Worked out once when the screen opens, so a box doesn't vanish while you clear it.
+    @State private var legacySenses: Set<SenseType> = []
     @State private var hasLoadedSenses = false
+
+    // MARK: - Senses bar state (B-183.7, 183.7.1, 183.7.3, 183.5)
+
+    @Environment(\.modelContext) private var modelContext
+    @State private var openSense: SenseButton?
+    /// A tool tile tapped in the sense sheet; its addendum opens once that sheet has closed (SwiftUI drops a sheet
+    /// presented while another is still leaving).
+    @State private var pendingAddendum: AddendumTarget?
+    @State private var addendumTarget: AddendumTarget?
+    @State private var editingSenses = false
+    @State private var selectedStickerID: PersistentIdentifier?
 
     @Query private var allEntries: [MilestoneEntry]
     @State private var showingDatePicker = false
@@ -30,6 +43,7 @@ struct EntryDetailView: View {
     @ScaledMetric(relativeTo: .headline) private var headingSize: CGFloat = 20
     @ScaledMetric(relativeTo: .title2) private var glyphSize: CGFloat = 28
     @ScaledMetric(relativeTo: .body) private var mapHeight: CGFloat = 160
+    @ScaledMetric(relativeTo: .body) private var thumbSize: CGFloat = 64
 
     var body: some View {
         // REM: F-M1, his word 2026-11-09: "i guess it looks okay as presented" — "Date, Entry, Addenda, Location in
@@ -47,20 +61,31 @@ struct EntryDetailView: View {
 
             // REM: F-M3: "The title box has no 'Entry' label above it. Empty, it shows a gray 'Entry title' hint".
             Section {
-                TextField(text: $entry.title, prompt: Text("Entry title")) {
-                    Text("Entry title")
-                }
-                .labelsHidden()
-                .font(.system(size: headingSize, weight: .semibold))
-                .accessibilityLabel("Entry title")
-                .accessibilityIdentifier("entryTitle")
+                // REM: B-183.7.3: "It stamps the entry, you move it anywhere on the page, and you write around it or
+                // leave it." The stickers ride on the entry card (title + text), above the words.
+                VStack(alignment: .leading, spacing: 12) {
+                    TextField(text: $entry.title, prompt: Text("Entry title")) {
+                        Text("Entry title")
+                    }
+                    .labelsHidden()
+                    .font(.system(size: headingSize, weight: .semibold))
+                    .accessibilityLabel("Entry title")
+                    .accessibilityIdentifier("entryTitle")
 
-                TextField(text: $entry.body, prompt: Text("Write about this moment..."), axis: .vertical) {
-                    Text("Entry text")
+                    TextField(text: $entry.body, prompt: Text("Write about this moment..."), axis: .vertical) {
+                        Text("Entry text")
+                    }
+                    .labelsHidden()
+                    .lineLimit(4...20)
+                    .accessibilityLabel("Entry text")
                 }
-                .labelsHidden()
-                .lineLimit(4...20)
-                .accessibilityLabel("Entry text")
+                .overlay {
+                    StickerLayer(entry: entry, selectedID: $selectedStickerID)
+                }
+
+                if let sticker = selectedSticker {
+                    stickerControls(sticker)
+                }
 
                 // REM: The face picked to start the entry (his TestFlight feedback, build 21) — changeable here.
                 Picker("Feeling", selection: $entry.feeling) {
@@ -74,12 +99,18 @@ struct EntryDetailView: View {
 
             // MARK: - Addenda (F-M1, B-183.2.1, B-183.2.2)
 
-            // REM: F-M1: "addenda are one block right under the entry". Only shown when the entry has some; the sense
-            // sheets that add them are the next piece.
+            // REM: F-M1: "addenda are one block right under the entry". Only shown when the entry has some; the tool
+            // tiles in the sense sheets add them (B-183.7.1). Tap one to look at it, play it, change it or remove it.
             if !entry.sortedAddenda.isEmpty {
                 Section {
                     ForEach(entry.sortedAddenda) { addendum in
-                        addendumCard(addendum)
+                        Button {
+                            addendumTarget = .existing(addendum)
+                        } label: {
+                            addendumCard(addendum)
+                        }
+                        .buttonStyle(.plain)
+                        .accessibilityHint("Opens this addendum.")
                     }
                 }
             }
@@ -121,27 +152,15 @@ struct EntryDetailView: View {
 
             VoiceMemoSection(memo: $entry.voiceMemo, text: $entry.body)
 
-            // MARK: - Senses
+            // MARK: - Senses written with the old sense tiles
 
-            Section {
-                SensePicker(activeSenses: $activeSenses)
-                    .padding(.vertical, 4)
-                    .onChange(of: activeSenses) { _, newValue in
-                        entry.activeSenses = newValue.map(\.rawValue)
-                    }
-            } header: {
-                Text("Senses").font(.system(size: bodySize))
-            }
-
-            // MARK: - Active Sense Inputs
-
-            if activeSenses.contains(.sight) {
+            if legacySenses.contains(.sight) {
                 Section {
                     sightSection
                 }
             }
 
-            if activeSenses.contains(.touch) {
+            if legacySenses.contains(.touch) {
                 Section {
                     TouchInputView(description: Binding(
                         get: { entry.touchDescription ?? "" },
@@ -150,7 +169,7 @@ struct EntryDetailView: View {
                 }
             }
 
-            if activeSenses.contains(.smell) {
+            if legacySenses.contains(.smell) {
                 Section {
                     SmellInputView(
                         description: Binding(
@@ -166,7 +185,7 @@ struct EntryDetailView: View {
                 }
             }
 
-            if activeSenses.contains(.taste) {
+            if legacySenses.contains(.taste) {
                 Section {
                     TasteInputView(
                         description: Binding(
@@ -184,9 +203,42 @@ struct EntryDetailView: View {
 
             // REM: B-183.8, his word 2026-11-09: "yes replace it with the index" — "the star toggle comes off
             // entries". The Appendix row and star are gone from the entry; isMilestone stays in the store untouched
-            // (the Appendix tab still reads it). The Index is the top-bar button below.
+            // (nothing shows it now; the data is kept). The Index is the top-bar button below and its own tab.
         }
         .font(.system(size: bodySize))
+        // REM: F-M1 mockup: ".safeAreaInset(edge: .bottom) › HStack" — "The five senses sit in a bar pinned to the
+        // bottom (.safeAreaInset), so they stay put while you scroll. Tapping one opens its sheet of glyphs, its tool
+        // glyph included (B-183.7.1)."
+        .safeAreaInset(edge: .bottom, spacing: 0) {
+            SenseBarView(onSense: { openSense = $0 }, onEdit: { editingSenses = true })
+        }
+        .sheet(item: $openSense, onDismiss: {
+            if let pending = pendingAddendum {
+                pendingAddendum = nil
+                addendumTarget = pending
+            }
+        }) { sense in
+            SenseSheetView(startSenseID: sense.id,
+                           onTool: { sense, tool in
+                               pendingAddendum = .new(sense, tool)
+                               openSense = nil
+                           },
+                           onGlyph: { sense, glyph in
+                               stamp(glyph, from: sense)
+                               openSense = nil
+                           })
+        }
+        .sheet(item: $addendumTarget) { target in
+            switch target {
+            case .new(let sense, let tool):
+                AddendumEditorView(entry: entry, sense: sense, startTool: tool)
+            case .existing(let addendum):
+                AddendumEditorView(entry: entry, addendum: addendum)
+            }
+        }
+        .sheet(isPresented: $editingSenses) {
+            SenseEditorView()
+        }
         // REM: F-M3: "the title bar shows the entry's own title instead of 'Entry', and it changes as you type ...
         // Empty ... the bar falls back to 'Entry'."
         .navigationTitle(entry.title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? "Entry" : entry.title)
@@ -204,14 +256,19 @@ struct EntryDetailView: View {
                         Label("Index", systemImage: "list.bullet.indent")
                     }
                     .accessibilityLabel("Index")
-                    .accessibilityHint("Lists your senses. Tap one to see every entry with it.")
+                    .accessibilityHint("Lists your senses and glyphs. Tap one to see every entry with it.")
                     .accessibilityIdentifier("indexButton")
                 }
             }
         }
         .onAppear {
             if !hasLoadedSenses {
-                activeSenses = Set(entry.activeSenses.compactMap { SenseType(rawValue: $0) })
+                var old: Set<SenseType> = []
+                if !(entry.sightPhotos ?? []).isEmpty { old.insert(.sight) }
+                if !(entry.touchDescription ?? "").isEmpty { old.insert(.touch) }
+                if !(entry.smellDescription ?? "").isEmpty || entry.smellPhoto != nil { old.insert(.smell) }
+                if !(entry.tasteDescription ?? "").isEmpty || entry.tastePhoto != nil { old.insert(.taste) }
+                legacySenses = old
                 hasLoadedSenses = true
             }
         }
@@ -266,15 +323,98 @@ struct EntryDetailView: View {
             VStack(alignment: .leading, spacing: 2) {
                 Text(heading.isEmpty ? addendum.senseName : heading)
                     .font(.system(size: headingSize, weight: .semibold))
-                if !heading.isEmpty {
-                    Text(addendum.senseName)
+                    .foregroundStyle(.primary)
+                // F-M1 mockup: "Hearing · 0:42" under a recording.
+                let length = addendum.audio != nil && addendum.audioSeconds > 0
+                    ? " · " + VoiceMemoRecorder.clock(addendum.audioSeconds) : ""
+                if !heading.isEmpty || !length.isEmpty {
+                    Text(addendum.senseName + length)
                         .font(.system(size: bodySize))
                         .foregroundStyle(.secondary)
                 }
+                let words = addendum.text.trimmingCharacters(in: .whitespacesAndNewlines)
+                if !words.isEmpty {
+                    Text(words)
+                        .font(.system(size: bodySize))
+                        .foregroundStyle(.primary)
+                        .lineLimit(3)
+                }
+            }
+            Spacer(minLength: 0)
+            if let photo = addendum.photo {
+                JournalPhoto(data: photo)
+                    .frame(width: thumbSize, height: thumbSize)
+                    .clipShape(RoundedRectangle(cornerRadius: 8))
+                    .accessibilityHidden(true)
             }
         }
         .padding(.vertical, 4)
+        .contentShape(Rectangle())
         .accessibilityElement(children: .combine)
+    }
+
+    // MARK: - Stickers (B-183.7.3)
+
+    private var selectedSticker: EntrySticker? {
+        guard let selectedStickerID else { return nil }
+        return entry.sortedStickers.first { $0.persistentModelID == selectedStickerID }
+    }
+
+    /// REM: B-183.7: "Tapping one embeds the glyph in the journal entry". It lands near the top right, each new one a
+    /// little lower, so a new sticker doesn't hide the one before; then you drag it (or use the arrows) where you want.
+    private func stamp(_ glyph: SenseGlyph, from sense: SenseButton) {
+        let count = entry.sortedStickers.count
+        let sticker = EntrySticker(glyph: glyph, sense: sense, x: 0.88, y: 0.18 + Double(count % 5) * 0.16)
+        modelContext.insert(sticker)
+        sticker.entry = entry
+        selectedStickerID = nil
+    }
+
+    /// The button way to move or peel off a sticker (his rule: a drag is never the only way).
+    private func stickerControls(_ sticker: EntrySticker) -> some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Label(sticker.name.isEmpty ? "Sticker" : sticker.name, systemImage: sticker.symbol)
+                .font(.system(size: bodySize, weight: .semibold))
+            HStack(spacing: 8) {
+                nudge("Move Left", symbol: "arrow.left", sticker) { $0.x -= 0.06 }
+                nudge("Move Up", symbol: "arrow.up", sticker) { $0.y -= 0.06 }
+                nudge("Move Down", symbol: "arrow.down", sticker) { $0.y += 0.06 }
+                nudge("Move Right", symbol: "arrow.right", sticker) { $0.x += 0.06 }
+            }
+            HStack(spacing: 12) {
+                Button(role: .destructive) {
+                    selectedStickerID = nil
+                    modelContext.delete(sticker)
+                } label: {
+                    Label("Remove Sticker", systemImage: "trash").font(.system(size: bodySize, weight: .semibold))
+                }
+                .accessibilityHint("Peels this sticker off your entry.")
+                .accessibilityIdentifier("stickerRemove")
+                Button {
+                    selectedStickerID = nil
+                } label: {
+                    Text("Done").font(.system(size: bodySize, weight: .semibold))
+                }
+                .accessibilityHint("Leaves the sticker where it is.")
+            }
+            .buttonStyle(.bordered)
+        }
+        .padding(.vertical, 4)
+    }
+
+    private func nudge(_ name: String, symbol: String, _ sticker: EntrySticker,
+                       _ change: @escaping (EntrySticker) -> Void) -> some View {
+        Button {
+            change(sticker)
+            sticker.x = min(max(sticker.x, 0.04), 0.96)
+            sticker.y = min(max(sticker.y, 0.04), 0.96)
+        } label: {
+            Image(systemName: symbol)
+                .font(.system(size: bodySize, weight: .semibold))
+                .frame(minWidth: 32, minHeight: 32)
+        }
+        .buttonStyle(.bordered)
+        .accessibilityLabel(name)
     }
 
     // MARK: - Location Card
@@ -364,5 +504,85 @@ struct EntryDetailView: View {
                 }
             }
         }
+    }
+}
+
+// MARK: - Addendum target
+
+/// Which addendum the editor opens: a new one from a tool tile, or one already on the entry.
+enum AddendumTarget: Identifiable {
+    case new(SenseButton, SenseTool)
+    case existing(Addendum)
+
+    var id: String {
+        switch self {
+        case .new(let sense, let tool): "new-\(sense.id)-\(tool.rawValue)"
+        case .existing(let addendum): "addendum-\(addendum.persistentModelID.hashValue)"
+        }
+    }
+}
+
+// MARK: - Sticker layer (B-183.7.3)
+
+/// The stickers on the entry card. Only the stickers take touches; the rest of the card is the text underneath.
+struct StickerLayer: View {
+    let entry: MilestoneEntry
+    @Binding var selectedID: PersistentIdentifier?
+
+    var body: some View {
+        GeometryReader { geo in
+            ForEach(entry.sortedStickers) { sticker in
+                StickerView(sticker: sticker, area: geo.size,
+                            isSelected: sticker.persistentModelID == selectedID) {
+                    selectedID = selectedID == sticker.persistentModelID ? nil : sticker.persistentModelID
+                }
+            }
+        }
+    }
+}
+
+struct StickerView: View {
+    @Bindable var sticker: EntrySticker
+    let area: CGSize
+    let isSelected: Bool
+    let onTap: () -> Void
+
+    @State private var drag: CGSize = .zero
+    @ScaledMetric(relativeTo: .title) private var glyphSize: CGFloat = 30
+
+    var body: some View {
+        Image(systemName: sticker.symbol.isEmpty ? "sparkles" : sticker.symbol)
+            .font(.system(size: glyphSize))
+            .foregroundStyle(Color.accentColor)
+            .padding(10)
+            .background(
+                RoundedRectangle(cornerRadius: 12)
+                    .fill(.background)
+                    .shadow(color: .black.opacity(0.25), radius: 3, y: 1)
+            )
+            .overlay(
+                RoundedRectangle(cornerRadius: 12)
+                    .strokeBorder(isSelected ? Color.accentColor : Color.secondary.opacity(0.3), lineWidth: isSelected ? 3 : 1)
+            )
+            .contentShape(RoundedRectangle(cornerRadius: 12))
+            // Gestures sit before .position so only the sticker itself is touchable, not the whole card.
+            .gesture(
+                DragGesture(minimumDistance: 6)
+                    .onChanged { drag = $0.translation }
+                    .onEnded { value in
+                        guard area.width > 0, area.height > 0 else { drag = .zero; return }
+                        sticker.x = min(max(sticker.x + value.translation.width / area.width, 0.04), 0.96)
+                        sticker.y = min(max(sticker.y + value.translation.height / area.height, 0.04), 0.96)
+                        drag = .zero
+                    }
+            )
+            .onTapGesture(perform: onTap)
+            .accessibilityElement()
+            .accessibilityLabel(sticker.name.isEmpty ? "Sticker" : sticker.name)
+            .accessibilityAddTraits(.isButton)
+            .accessibilityAddTraits(isSelected ? .isSelected : [])
+            .accessibilityHint("Shows buttons to move or remove this sticker.")
+            .offset(drag)
+            .position(x: sticker.x * area.width, y: sticker.y * area.height)
     }
 }

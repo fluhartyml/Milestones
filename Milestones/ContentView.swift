@@ -8,7 +8,7 @@
 import SwiftUI
 import SwiftData
 
-/// Root tab navigator — like a physical book: TOC, Journal, About, Appendix.
+/// Root tab navigator — like a physical book: TOC, Journal, About, Index.
 struct ContentView: View {
 
     // REM: line 002.1 — the name is asked once, at first launch, over the journal (NameAskView).
@@ -55,9 +55,11 @@ struct ContentView: View {
                     Label("About", systemImage: "info.circle")
                 }
 
-            AppendixView()
+            // REM: amber B-183.8, his word 2026-11-09 19:3x: "yes replace it with the index index sounds more natural."
+            // "The Appendix goes; an Index by sense and glyph takes its place". Same place in the tab bar.
+            IndexTab()
                 .tabItem {
-                    Label("Appendix", systemImage: "star")
+                    Label("Index", systemImage: "list.bullet.indent")
                 }
 
             // REM: line 001.12 — Settings holds Access Location. On the Mac it is the Settings

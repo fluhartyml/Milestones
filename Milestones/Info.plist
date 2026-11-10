@@ -4,6 +4,8 @@
 <dict>
 	<key>NSFaceIDUsageDescription</key>
 	<string>Milestones uses Face ID to unlock your journal when the journal lock is on.</string>
+	<key>NSCameraUsageDescription</key>
+	<string>Take a picture to add to your journal entry.</string>
 	<key>NSAlarmKitUsageDescription</key>
 	<string>Nagging sets alarms every few minutes until you write today’s entry.</string>
 	<key>UIBackgroundModes</key>

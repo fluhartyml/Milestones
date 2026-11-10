@@ -26,8 +26,11 @@ enum SenseType: String, CaseIterable, Identifiable, Codable {
         case .touch: "Touch"
         case .smell: "Smell"
         case .taste: "Taste"
-        case .vestibular: "Vestibular"
-        case .proprioception: "Proprioception"
+        // REM: amber B-183.3, his word 2026-11-07: "Vestibular" and "Proprioception" are too big — "words a 3rd or 4th
+        // grader knows (the mockup uses Balance and Body)". B-183.3.1: they are not on the senses bar; the five are.
+        // Raw values stay as they are, so anything already stored still reads.
+        case .vestibular: "Balance"
+        case .proprioception: "Body"
         }
     }
 
