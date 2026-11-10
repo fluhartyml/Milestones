@@ -36,6 +36,9 @@ struct EntryDetailView: View {
     @State private var addendumTarget: AddendumTarget?
     @State private var editingSenses = false
     @State private var selectedStickerID: PersistentIdentifier?
+    /// B-183.7: drawing on the entry card (EntryDrawingView.swift).
+    @State private var isDrawing = false
+    @ScaledMetric(relativeTo: .body) private var drawingRoom: CGFloat = 260
 
     @Query private var allEntries: [MilestoneEntry]
     @State private var showingDatePicker = false
@@ -48,162 +51,13 @@ struct EntryDetailView: View {
     var body: some View {
         // REM: F-M1, his word 2026-11-09: "i guess it looks okay as presented" — "Date, Entry, Addenda, Location in
         // one VStack". The Form keeps that order top to bottom, each section a card; the rest of the entry follows.
-        Form {
-            // MARK: - Date (B-183)
-
-            // REM: B-183, his layout: "the date is #1 on the screen, at the top." F-M2: "yes drop it." — the gray
-            // "2026 NOV 07 0933" stamp card is gone from this screen; this Date card shows the date instead.
-            Section {
-                dateCard
-            }
-
-            // MARK: - Entry (F-M3)
-
-            // REM: F-M3: "The title box has no 'Entry' label above it. Empty, it shows a gray 'Entry title' hint".
-            Section {
-                // REM: B-183.7.3: "It stamps the entry, you move it anywhere on the page, and you write around it or
-                // leave it." The stickers ride on the entry card (title + text), above the words.
-                VStack(alignment: .leading, spacing: 12) {
-                    TextField(text: $entry.title, prompt: Text("Entry title")) {
-                        Text("Entry title")
-                    }
-                    .labelsHidden()
-                    .font(.system(size: headingSize, weight: .semibold))
-                    .accessibilityLabel("Entry title")
-                    .accessibilityIdentifier("entryTitle")
-
-                    TextField(text: $entry.body, prompt: Text("Write about this moment..."), axis: .vertical) {
-                        Text("Entry text")
-                    }
-                    .labelsHidden()
-                    .lineLimit(4...20)
-                    .accessibilityLabel("Entry text")
-                }
-                .overlay {
-                    StickerLayer(entry: entry, selectedID: $selectedStickerID)
-                }
-
-                if let sticker = selectedSticker {
-                    stickerControls(sticker)
-                }
-
-                // REM: The face picked to start the entry (his TestFlight feedback, build 21) — changeable here.
-                Picker("Feeling", selection: $entry.feeling) {
-                    Text("None").tag(Mood?.none)
-                    ForEach(Mood.allCases) { mood in
-                        Text("\(mood.emoji) \(mood.name)").tag(Optional(mood))
-                    }
-                }
-                .accessibilityIdentifier("entryFeeling")
-            }
-
-            // MARK: - Addenda (F-M1, B-183.2.1, B-183.2.2)
-
-            // REM: F-M1: "addenda are one block right under the entry". Only shown when the entry has some; the tool
-            // tiles in the sense sheets add them (B-183.7.1). Tap one to look at it, play it, change it or remove it.
-            if !entry.sortedAddenda.isEmpty {
-                Section {
-                    ForEach(entry.sortedAddenda) { addendum in
-                        Button {
-                            addendumTarget = .existing(addendum)
-                        } label: {
-                            addendumCard(addendum)
-                        }
-                        .buttonStyle(.plain)
-                        .accessibilityHint("Opens this addendum.")
-                    }
-                }
-            }
-
-            // MARK: - Location (B-183.1)
-
-            if entry.hasLocation || entry.locationName != nil {
-                Section {
-                    locationCard
-                }
-            }
-
-            // MARK: - Weather
-
-            if entry.hasWeather {
-                Section {
-                    HStack(spacing: 16) {
-                        if let temp = entry.weatherTemperature {
-                            Label("\(Int(temp))°F", systemImage: "thermometer.medium")
-                        }
-                        if let humidity = entry.weatherHumidity {
-                            Label("\(Int(humidity))%", systemImage: "humidity.fill")
-                        }
-                        if let wind = entry.weatherWindSpeed {
-                            Label("\(Int(wind)) mph", systemImage: "wind")
-                        }
-                        if let uv = entry.weatherUVIndex {
-                            Label("UV \(uv)", systemImage: "sun.max.fill")
-                        }
-                    }
-                    .font(.system(size: bodySize))
-                    .foregroundStyle(.secondary)
-
-                    WeatherAttributionView()
-                } header: {
-                    Text("Weather").font(.system(size: bodySize))
-                }
-            }
-
-            VoiceMemoSection(memo: $entry.voiceMemo, text: $entry.body)
-
-            // MARK: - Senses written with the old sense tiles
-
-            if legacySenses.contains(.sight) {
-                Section {
-                    sightSection
-                }
-            }
-
-            if legacySenses.contains(.touch) {
-                Section {
-                    TouchInputView(description: Binding(
-                        get: { entry.touchDescription ?? "" },
-                        set: { entry.touchDescription = $0.isEmpty ? nil : $0 }
-                    ))
-                }
-            }
-
-            if legacySenses.contains(.smell) {
-                Section {
-                    SmellInputView(
-                        description: Binding(
-                            get: { entry.smellDescription ?? "" },
-                            set: { entry.smellDescription = $0.isEmpty ? nil : $0 }
-                        ),
-                        photoItem: $smellPhotoItem,
-                        photoData: Binding(
-                            get: { entry.smellPhoto },
-                            set: { entry.smellPhoto = $0 }
-                        )
-                    )
-                }
-            }
-
-            if legacySenses.contains(.taste) {
-                Section {
-                    TasteInputView(
-                        description: Binding(
-                            get: { entry.tasteDescription ?? "" },
-                            set: { entry.tasteDescription = $0.isEmpty ? nil : $0 }
-                        ),
-                        photoItem: $tastePhotoItem,
-                        photoData: Binding(
-                            get: { entry.tastePhoto },
-                            set: { entry.tastePhoto = $0 }
-                        )
-                    )
-                }
-            }
-
-            // REM: B-183.8, his word 2026-11-09: "yes replace it with the index" — "the star toggle comes off
-            // entries". The Appendix row and star are gone from the entry; isMilestone stays in the store untouched
-            // (nothing shows it now; the data is kept). The Index is the top-bar button below and its own tab.
+        // REM: B-182 / B-182.1: on the iPhone Duo, opened or standing, the entry lies like an open book with the hinge as
+        // the spine — Date and Entry on the left page, the Addenda, Location and the rest on the right (OpenBook.swift).
+        // Closed, and on every other device, it is the one page above, unchanged.
+        OpenBook {
+            leftPage
+        } right: {
+            rightPage
         }
         .font(.system(size: bodySize))
         // REM: F-M1 mockup: ".safeAreaInset(edge: .bottom) › HStack" — "The five senses sit in a bar pinned to the
@@ -272,6 +126,181 @@ struct EntryDetailView: View {
                 hasLoadedSenses = true
             }
         }
+    }
+
+    // MARK: - Pages (B-182.1)
+
+    /// The left page of the open book: the Date card and the entry.
+    @ViewBuilder
+    private var leftPage: some View {
+        // MARK: - Date (B-183)
+
+        // REM: B-183, his layout: "the date is #1 on the screen, at the top." F-M2: "yes drop it." — the gray
+        // "2026 NOV 07 0933" stamp card is gone from this screen; this Date card shows the date instead.
+        Section {
+            dateCard
+        }
+
+        // MARK: - Entry (F-M3)
+
+        // REM: F-M3: "The title box has no 'Entry' label above it. Empty, it shows a gray 'Entry title' hint".
+        Section {
+            // REM: B-183.7.3: "It stamps the entry, you move it anywhere on the page, and you write around it or
+            // leave it." The stickers ride on the entry card (title + text), above the words.
+            VStack(alignment: .leading, spacing: 12) {
+                TextField(text: $entry.title, prompt: Text("Entry title")) {
+                    Text("Entry title")
+                }
+                .labelsHidden()
+                .font(.system(size: headingSize, weight: .semibold))
+                .accessibilityLabel("Entry title")
+                .accessibilityIdentifier("entryTitle")
+
+                TextField(text: $entry.body, prompt: Text("Write about this moment..."), axis: .vertical) {
+                    Text("Entry text")
+                }
+                .labelsHidden()
+                .lineLimit(4...20)
+                .accessibilityLabel("Entry text")
+            }
+            // REM: B-183.7 "so you can type or draw near it with Apple Pencil" — while you draw, the card is at least
+            // drawingRoom tall so there is room around the glyphs; the drawing sits over the words, under the stickers.
+            .frame(minHeight: isDrawing || entry.drawing != nil ? drawingRoom : nil, alignment: .top)
+            .overlay {
+                EntryDrawingLayer(entry: entry, isDrawing: isDrawing)
+            }
+            .overlay {
+                StickerLayer(entry: entry, selectedID: $selectedStickerID)
+                    .allowsHitTesting(!isDrawing)
+            }
+
+            if let sticker = selectedSticker, !isDrawing {
+                stickerControls(sticker)
+            }
+
+            DrawingControls(entry: entry, isDrawing: $isDrawing)
+
+            // REM: The face picked to start the entry (his TestFlight feedback, build 21) — changeable here.
+            Picker("Feeling", selection: $entry.feeling) {
+                Text("None").tag(Mood?.none)
+                ForEach(Mood.allCases) { mood in
+                    Text("\(mood.emoji) \(mood.name)").tag(Optional(mood))
+                }
+            }
+            .accessibilityIdentifier("entryFeeling")
+        }
+    }
+
+    /// The right page: the addenda, location, weather, voice memo and the old sense boxes.
+    @ViewBuilder
+    private var rightPage: some View {
+        // MARK: - Addenda (F-M1, B-183.2.1, B-183.2.2)
+
+        // REM: F-M1: "addenda are one block right under the entry". Only shown when the entry has some; the tool
+        // tiles in the sense sheets add them (B-183.7.1). Tap one to look at it, play it, change it or remove it.
+        if !entry.sortedAddenda.isEmpty {
+            Section {
+                ForEach(entry.sortedAddenda) { addendum in
+                    Button {
+                        addendumTarget = .existing(addendum)
+                    } label: {
+                        addendumCard(addendum)
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityHint("Opens this addendum.")
+                }
+            }
+        }
+
+        // MARK: - Location (B-183.1)
+
+        if entry.hasLocation || entry.locationName != nil {
+            Section {
+                locationCard
+            }
+        }
+
+        // MARK: - Weather
+
+        if entry.hasWeather {
+            Section {
+                HStack(spacing: 16) {
+                    if let temp = entry.weatherTemperature {
+                        Label("\(Int(temp))°F", systemImage: "thermometer.medium")
+                    }
+                    if let humidity = entry.weatherHumidity {
+                        Label("\(Int(humidity))%", systemImage: "humidity.fill")
+                    }
+                    if let wind = entry.weatherWindSpeed {
+                        Label("\(Int(wind)) mph", systemImage: "wind")
+                    }
+                    if let uv = entry.weatherUVIndex {
+                        Label("UV \(uv)", systemImage: "sun.max.fill")
+                    }
+                }
+                .font(.system(size: bodySize))
+                .foregroundStyle(.secondary)
+
+                WeatherAttributionView()
+            } header: {
+                Text("Weather").font(.system(size: bodySize))
+            }
+        }
+
+        VoiceMemoSection(memo: $entry.voiceMemo, text: $entry.body)
+
+        // MARK: - Senses written with the old sense tiles
+
+        if legacySenses.contains(.sight) {
+            Section {
+                sightSection
+            }
+        }
+
+        if legacySenses.contains(.touch) {
+            Section {
+                TouchInputView(description: Binding(
+                    get: { entry.touchDescription ?? "" },
+                    set: { entry.touchDescription = $0.isEmpty ? nil : $0 }
+                ))
+            }
+        }
+
+        if legacySenses.contains(.smell) {
+            Section {
+                SmellInputView(
+                    description: Binding(
+                        get: { entry.smellDescription ?? "" },
+                        set: { entry.smellDescription = $0.isEmpty ? nil : $0 }
+                    ),
+                    photoItem: $smellPhotoItem,
+                    photoData: Binding(
+                        get: { entry.smellPhoto },
+                        set: { entry.smellPhoto = $0 }
+                    )
+                )
+            }
+        }
+
+        if legacySenses.contains(.taste) {
+            Section {
+                TasteInputView(
+                    description: Binding(
+                        get: { entry.tasteDescription ?? "" },
+                        set: { entry.tasteDescription = $0.isEmpty ? nil : $0 }
+                    ),
+                    photoItem: $tastePhotoItem,
+                    photoData: Binding(
+                        get: { entry.tastePhoto },
+                        set: { entry.tastePhoto = $0 }
+                    )
+                )
+            }
+        }
+
+        // REM: B-183.8, his word 2026-11-09: "yes replace it with the index" — "the star toggle comes off
+        // entries". The Appendix row and star are gone from the entry; isMilestone stays in the store untouched
+        // (nothing shows it now; the data is kept). The Index is the top-bar button below and its own tab.
     }
 
     // MARK: - Date Card

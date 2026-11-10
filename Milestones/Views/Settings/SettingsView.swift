@@ -39,6 +39,8 @@ struct SettingsView: View {
     @AppStorage(ReminderKeys.persistent) private var reminderPersistent = false
     @AppStorage(ReminderKeys.snoozeMinutes) private var snoozeMinutes = 60
     @State private var notificationsOff = false
+    /// Set by the hinge probe: this device has a hinge (the iPhone Duo).
+    @State private var hasHinge = false
     @Environment(\.openURL) private var openURL
     @Environment(\.scenePhase) private var scenePhase
 
@@ -124,7 +126,16 @@ struct SettingsView: View {
 
             // REM: line 010.2 — "the revoking option in settings" (JournalLock.swift).
             JournalLockSection()
+
+            // REM: amber B-182.2 — "You personalize the cover". Only on a device with a hinge (the iPhone Duo), the
+            // one place the book opens, so no other device shows choices that change nothing (DiaryStyle.swift).
+            if hasHinge {
+                DiarySection()
+            }
         }
+        #if os(iOS)
+        .background(HingeReader(minimumPage: 280) { hasHinge = $0.hasHinge })
+        #endif
         #if os(macOS)
         .formStyle(.grouped)
         #endif

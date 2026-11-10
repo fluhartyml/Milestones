@@ -71,6 +71,13 @@ final class MilestoneEntry {
     @Attribute(.externalStorage)
     var voiceMemo: Data?
 
+    // MARK: - Drawing (amber B-183.7)
+
+    /// What you drew on the entry card (a PKDrawing's data). Optional: older entries have none (a lightweight migration).
+    /// REM: B-183.7 "so you can type or draw near it with Apple Pencil".
+    @Attribute(.externalStorage)
+    var drawing: Data?
+
     // MARK: - Index / Milestone (1.0.5, 4.1)
 
     /// Whether this entry has been promoted to a milestone in the index

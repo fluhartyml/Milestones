@@ -45,6 +45,8 @@ struct AddendumEditorView: View {
     @ScaledMetric(relativeTo: .headline) private var headingSize: CGFloat = 20
     @ScaledMetric(relativeTo: .title2) private var glyphSize: CGFloat = 28
     @ScaledMetric(relativeTo: .body) private var photoHeight: CGFloat = 220
+    /// B-183.4: the picture gets the whole left page when the Duo is open.
+    @ScaledMetric(relativeTo: .body) private var spreadPhotoHeight: CGFloat = 380
 
     init(entry: MilestoneEntry, sense: SenseButton, startTool: SenseTool?) {
         self.entry = entry
@@ -69,54 +71,31 @@ struct AddendumEditorView: View {
 
     var body: some View {
         NavigationStack {
-            Form {
-                Section {
-                    // REM: B-183.2.1 — the sense's glyph stamped at the top.
-                    HStack(spacing: 12) {
-                        Image(systemName: sense.glyph.isEmpty ? "sparkles" : sense.glyph)
-                            .font(.system(size: glyphSize))
-                            .foregroundStyle(Color.accentColor)
-                            .accessibilityHidden(true)
-                        Text(sense.name)
-                            .font(.system(size: headingSize, weight: .semibold))
-                            .accessibilityAddTraits(.isHeader)
-                    }
-                    TextField(text: $title, prompt: Text("Addendum title")) { Text("Addendum title") }
-                        .labelsHidden()
-                        .font(.system(size: headingSize, weight: .semibold))
-                        .accessibilityLabel("Addendum title")
-                        .accessibilityIdentifier("addendumTitle")
+            // REM: B-183.4 (locked 2026-11-09): "iPhone Duo: a sub-entry spreads across the open book: the picture on
+            // one page, and you type about it on the facing page. Ties to 182.1 (hinge = spine)." Open on the Duo: the
+            // picture fills the left page; the title, recording and your words face it on the right. An addendum with no
+            // picture (Hearing, Touch) puts its heading and recording on the left and your words on the right. Closed,
+            // and on every other device, it is the one page it has always been.
+            OpenBook {
+                headerSection
+                if showsPicture { pictureSection(height: photoHeight) }
+                if showsRecording { VoiceMemoSection(memo: $audio, text: $text) }
+                if showsWords { wordsSection }
+                if existing != nil { removeSection }
+            } left: {
+                if showsPicture {
+                    pictureSection(height: spreadPhotoHeight)
+                } else {
+                    headerSection
+                    if showsRecording { VoiceMemoSection(memo: $audio, text: $text) }
                 }
-
-                if tools.contains(.camera) || photo != nil {
-                    pictureSection
+            } right: {
+                if showsPicture {
+                    headerSection
+                    if showsRecording { VoiceMemoSection(memo: $audio, text: $text) }
                 }
-
-                if tools.contains(.microphone) || audio != nil {
-                    VoiceMemoSection(memo: $audio, text: $text)
-                }
-
-                if tools.contains(.keyboard) || tools.contains(.microphone) || !text.isEmpty {
-                    Section {
-                        TextField(text: $text, prompt: Text(sense.prompt), axis: .vertical) { Text("Addendum text") }
-                            .labelsHidden()
-                            .lineLimit(3...12)
-                            .focused($typing)
-                            .accessibilityLabel("Addendum text")
-                            .accessibilityIdentifier("addendumText")
-                    }
-                }
-
-                if existing != nil {
-                    Section {
-                        Button(role: .destructive) { confirmingRemove = true } label: {
-                            Label("Remove Addendum", systemImage: "trash")
-                                .font(.system(size: bodySize, weight: .semibold))
-                        }
-                        .accessibilityHint("Removes this addendum from your entry.")
-                        .accessibilityIdentifier("addendumRemove")
-                    }
-                }
+                if showsWords { wordsSection }
+                if existing != nil { removeSection }
             }
             .font(.system(size: bodySize))
             .navigationTitle(existing == nil ? "New Addendum" : "Addendum")
@@ -175,14 +154,62 @@ struct AddendumEditorView: View {
         #endif
     }
 
+    // MARK: - Sections
+
+    private var showsPicture: Bool { tools.contains(.camera) || photo != nil }
+    private var showsRecording: Bool { tools.contains(.microphone) || audio != nil }
+    private var showsWords: Bool { tools.contains(.keyboard) || tools.contains(.microphone) || !text.isEmpty }
+
+    private var headerSection: some View {
+        Section {
+            // REM: B-183.2.1 — the sense's glyph stamped at the top.
+            HStack(spacing: 12) {
+                Image(systemName: sense.glyph.isEmpty ? "sparkles" : sense.glyph)
+                    .font(.system(size: glyphSize))
+                    .foregroundStyle(Color.accentColor)
+                    .accessibilityHidden(true)
+                Text(sense.name)
+                    .font(.system(size: headingSize, weight: .semibold))
+                    .accessibilityAddTraits(.isHeader)
+            }
+            TextField(text: $title, prompt: Text("Addendum title")) { Text("Addendum title") }
+                .labelsHidden()
+                .font(.system(size: headingSize, weight: .semibold))
+                .accessibilityLabel("Addendum title")
+                .accessibilityIdentifier("addendumTitle")
+        }
+    }
+
+    private var wordsSection: some View {
+        Section {
+            TextField(text: $text, prompt: Text(sense.prompt), axis: .vertical) { Text("Addendum text") }
+                .labelsHidden()
+                .lineLimit(3...12)
+                .focused($typing)
+                .accessibilityLabel("Addendum text")
+                .accessibilityIdentifier("addendumText")
+        }
+    }
+
+    private var removeSection: some View {
+        Section {
+            Button(role: .destructive) { confirmingRemove = true } label: {
+                Label("Remove Addendum", systemImage: "trash")
+                    .font(.system(size: bodySize, weight: .semibold))
+            }
+            .accessibilityHint("Removes this addendum from your entry.")
+            .accessibilityIdentifier("addendumRemove")
+        }
+    }
+
     // MARK: - Picture
 
-    private var pictureSection: some View {
+    private func pictureSection(height: CGFloat) -> some View {
         Section {
             if let photo {
                 JournalPhoto(data: photo)
                     .frame(maxWidth: .infinity)
-                    .frame(height: photoHeight)
+                    .frame(height: height)
                     .clipShape(RoundedRectangle(cornerRadius: 12))
                     .accessibilityLabel("Your picture")
             }
