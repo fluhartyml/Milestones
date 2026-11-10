@@ -31,6 +31,8 @@ struct MilestonesApp: App {
     var sharedModelContainer: ModelContainer = {
         let schema = Schema([
             MilestoneEntry.self,
+            // REM: amber B-183.2 — addenda (sub-entries), new in this build; optional, so older stores open unchanged.
+            Addendum.self,
         ])
         let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
 

@@ -84,6 +84,13 @@ final class MilestoneEntry {
     /// The face picked to start the entry (Mood raw value). Optional: older entries have none.
     var mood: String?
 
+    // MARK: - Addenda (amber B-183.2, F-M1)
+
+    /// Sub-entries added to this entry, oldest first by createdAt. Optional with a default, so older stores
+    /// open unchanged (lightweight migration). Deleting the entry deletes its addenda.
+    @Relationship(deleteRule: .cascade, inverse: \Addendum.entry)
+    var addenda: [Addendum]? = []
+
     // MARK: - Init
 
     init(
@@ -121,6 +128,11 @@ extension MilestoneEntry {
     /// Whether this entry has any location data
     var hasLocation: Bool {
         latitude != nil && longitude != nil
+    }
+
+    /// The addenda in the order they were added (B-183.2: "New ones add at the bottom of this block", F-M1 model).
+    var sortedAddenda: [Addendum] {
+        (addenda ?? []).sorted { $0.createdAt < $1.createdAt }
     }
 
     /// Whether this entry has any photos attached

@@ -61,7 +61,8 @@ struct VoiceMemoSection: View {
             }
             .padding(.vertical, 4)
         } header: {
-            Text("Voice Memo")
+            // REM: 18 pt minimum (his rule) — the header was the system's small caption size.
+            Text("Voice Memo").font(.system(size: bodySize))
         } footer: {
             Text("Written out as text on this device. Nothing is sent anywhere.")
                 .font(.system(size: bodySize))
