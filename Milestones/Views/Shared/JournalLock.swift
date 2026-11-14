@@ -113,6 +113,12 @@ struct JournalLockGate: ViewModifier {
 private struct LockScreen: View {
     let asking: Bool
     let unlock: () -> Void
+    // REM: B-182.2, his "code it" 2026-11-14 — with Locking Strap on, the lock screen is the closed diary, strapped shut;
+    // the key (biometric authorization) opens it. Tapping the clasp works too (DiaryStyle.swift).
+    @AppStorage(DiaryKeys.strap) private var strap = false
+    @AppStorage(DiaryKeys.cover) private var cover: DiaryCover = .blackMarble
+    @AppStorage(DiaryKeys.binding) private var binding: DiaryBinding = .clothTape
+    @ScaledMetric(relativeTo: .body) private var diaryHeight: CGFloat = 300
     @ScaledMetric(relativeTo: .body) private var bodySize: CGFloat = 18
     @ScaledMetric(relativeTo: .title) private var titleSize: CGFloat = 28
     @ScaledMetric(relativeTo: .title) private var iconSize: CGFloat = 56
@@ -121,16 +127,27 @@ private struct LockScreen: View {
         ZStack {
             Rectangle().fill(.background).ignoresSafeArea()
             VStack(spacing: 20) {
-                Image(systemName: "lock.fill")
-                    .font(.system(size: iconSize))
-                    .foregroundStyle(SettingsView.buttonBlue)
-                    .accessibilityHidden(true)
-                Text("Your journal is locked")
+                if strap {
+                    Button(action: unlock) {
+                        ClosedDiaryView(cover: cover, binding: binding, strap: true)
+                            .frame(maxHeight: diaryHeight)
+                    }
+                    .buttonStyle(.plain)
+                    .disabled(asking)
+                    .accessibilityLabel("Your diary, strapped shut")
+                    .accessibilityHint("Opens it with \(JournalLock.methodName).")
+                } else {
+                    Image(systemName: "lock.fill")
+                        .font(.system(size: iconSize))
+                        .foregroundStyle(SettingsView.buttonBlue)
+                        .accessibilityHidden(true)
+                }
+                Text(strap ? "Your diary is locked" : "Your journal is locked")
                     .font(.system(size: titleSize, weight: .bold))
                     .multilineTextAlignment(.center)
                     .accessibilityAddTraits(.isHeader)
                 Button(action: unlock) {
-                    Label("Unlock with \(JournalLock.methodName)", systemImage: JournalLock.symbol)
+                    Label("Unlock with \(JournalLock.methodName)", systemImage: strap ? "key.fill" : JournalLock.symbol)
                         .font(.system(size: bodySize, weight: .semibold))
                         .foregroundStyle(.white)
                         .frame(maxWidth: .infinity, minHeight: 44)

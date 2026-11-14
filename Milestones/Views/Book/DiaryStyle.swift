@@ -12,8 +12,12 @@
 //    Spine   — "taped cloth spine, spiral wire, stitched, a ribbon bookmark" → Cloth Tape, Spiral Wire, Stitched; Ribbon.
 //    Pages   — "wide or college ruled, grid, dotted, blank ... aged and yellowed paper" → those five, White or Aged.
 //  Not built (reported, not invented): floral/botanical and doodle/sticker-bomb covers (they need artwork), the
-//  gold-stamped year or name and the closures (they show on a closed book, and the Duo's closed screen is the phone),
+//  gold-stamped year or name and the other closures (they show on a closed book, and the Duo's closed screen is the phone),
 //  one-day-per-page and handwriting fonts, and the Extras (tabs, flags, pen loop, back pocket).
+//  REM: B-182.2's last piece, his "code it" 2026-11-14: the teen diary's locking strap and key. The one place the diary
+//  shows CLOSED is the journal lock screen (JournalLock.swift), so that is where the strap goes: with Locking Strap on,
+//  the lock screen is your closed cover with the strap and brass clasp across it, and the key (biometric authorization,
+//  his word 11-14) opens it. Off by default — it's one of the mix-and-match pieces.
 //
 
 import SwiftUI
@@ -24,6 +28,7 @@ enum DiaryKeys {
     static let ribbon = "diaryRibbon"
     static let pages = "diaryPages"
     static let paper = "diaryPaper"
+    static let strap = "diaryStrap"
 }
 
 enum DiaryCover: String, CaseIterable, Identifiable {
@@ -306,6 +311,71 @@ struct DiaryRibbon: View {
     }
 }
 
+// MARK: - Locking strap and clasp
+
+/// The teen diary's strap: a leather band across the closed cover's front edge, held by a brass clasp with a keyhole.
+struct DiaryStrap: View {
+    var body: some View {
+        Canvas { context, size in
+            let h = size.height
+            let band = CGRect(x: size.width * 0.45, y: 0, width: size.width * 0.55, height: h)
+            context.fill(Path(band), with: .linearGradient(
+                Gradient(colors: [Color(red: 0.42, green: 0.24, blue: 0.13), Color(red: 0.30, green: 0.16, blue: 0.08)]),
+                startPoint: CGPoint(x: 0, y: 0), endPoint: CGPoint(x: 0, y: h)))
+            var stitches = Path()
+            for y in [h * 0.14, h * 0.86] {
+                stitches.move(to: CGPoint(x: band.minX, y: y)); stitches.addLine(to: CGPoint(x: band.maxX, y: y))
+            }
+            context.stroke(stitches, with: .color(Color(red: 0.93, green: 0.84, blue: 0.66).opacity(0.8)),
+                           style: StrokeStyle(lineWidth: 1.2, dash: [4, 3]))
+            // Brass clasp at the strap's end, with a keyhole.
+            let claspW = min(size.width * 0.32, h * 1.5)
+            let clasp = CGRect(x: band.minX - claspW * 0.55, y: -h * 0.12, width: claspW, height: h * 1.24)
+            let brass = Gradient(colors: [Color(red: 0.95, green: 0.82, blue: 0.45), Color(red: 0.72, green: 0.55, blue: 0.20),
+                                          Color(red: 0.55, green: 0.40, blue: 0.12)])
+            context.fill(Path(roundedRect: clasp, cornerRadius: h * 0.22), with: .linearGradient(
+                brass, startPoint: CGPoint(x: clasp.minX, y: clasp.minY), endPoint: CGPoint(x: clasp.maxX, y: clasp.maxY)))
+            context.stroke(Path(roundedRect: clasp.insetBy(dx: 1.5, dy: 1.5), cornerRadius: h * 0.2),
+                           with: .color(.black.opacity(0.25)), lineWidth: 1)
+            let r = h * 0.15
+            let c = CGPoint(x: clasp.midX, y: clasp.midY - r * 0.5)
+            var hole = Path(ellipseIn: CGRect(x: c.x - r, y: c.y - r, width: r * 2, height: r * 2))
+            hole.move(to: CGPoint(x: c.x - r * 0.45, y: c.y))
+            hole.addLine(to: CGPoint(x: c.x - r * 0.75, y: c.y + r * 2.6))
+            hole.addLine(to: CGPoint(x: c.x + r * 0.75, y: c.y + r * 2.6))
+            hole.addLine(to: CGPoint(x: c.x + r * 0.45, y: c.y))
+            hole.closeSubpath()
+            context.fill(hole, with: .color(Color(red: 0.12, green: 0.08, blue: 0.04)))
+        }
+        .shadow(color: .black.opacity(0.35), radius: 2, x: 0, y: 2)
+        .accessibilityHidden(true)
+    }
+}
+
+/// The diary shut: your cover, the spine edge, and (with Locking Strap on) the strap and clasp.
+struct ClosedDiaryView: View {
+    let cover: DiaryCover
+    let binding: DiaryBinding
+    let strap: Bool
+
+    var body: some View {
+        GeometryReader { geo in
+            ZStack(alignment: .leading) {
+                DiaryCoverView(cover: cover)
+                DiarySpineView(binding: binding, cover: cover).frame(width: max(10, geo.size.width * 0.07))
+                if strap {
+                    DiaryStrap()
+                        .frame(width: geo.size.width * 0.55, height: max(14, geo.size.height * 0.11))
+                        .position(x: geo.size.width * 0.725, y: geo.size.height * 0.5)
+                }
+            }
+        }
+        .aspectRatio(0.72, contentMode: .fit)
+        .clipShape(RoundedRectangle(cornerRadius: 8))
+        .shadow(color: .black.opacity(0.3), radius: 6, x: 0, y: 4)
+    }
+}
+
 // MARK: - Settings › Your Diary
 
 /// REM: B-182.2 "You personalize the cover". Shown in Settings only on a device with a hinge (the Duo), since the book
@@ -316,6 +386,8 @@ struct DiarySection: View {
     @AppStorage(DiaryKeys.ribbon) private var ribbon = true
     @AppStorage(DiaryKeys.pages) private var pages: DiaryPages = .wideRuled
     @AppStorage(DiaryKeys.paper) private var paper: DiaryPaper = .white
+    @AppStorage(DiaryKeys.strap) private var strap = false
+    @AppStorage(JournalLockKeys.on) private var lockOn = false
 
     @ScaledMetric(relativeTo: .body) private var bodySize: CGFloat = 18
     @ScaledMetric(relativeTo: .headline) private var headingSize: CGFloat = 20
@@ -353,11 +425,30 @@ struct DiarySection: View {
                 ForEach(DiaryPaper.allCases) { Text($0.name).tag($0) }
             } label: { Text("Paper").font(.system(size: bodySize)) }
                 .accessibilityLabel("Paper")
+            VStack(alignment: .leading, spacing: 6) {
+                Toggle(isOn: $strap) { Text("Locking Strap").font(.system(size: bodySize)) }
+                    .accessibilityLabel("Locking Strap")
+                    .accessibilityIdentifier("diaryStrapToggle")
+                Text(strap && !lockOn
+                     ? "The strap shows on your closed diary when it's locked. Turn on Journal Lock above to lock it with Biometric Authorization."
+                     : "The strap shows on your closed diary when it's locked; Biometric Authorization is the key.")
+                    .font(.system(size: bodySize))
+                    .foregroundStyle(.secondary)
+            }
         }
     }
 
-    /// A small open book with your picks.
+    /// Your diary closed (with the strap when it's on) beside a small open book with your picks.
     private var preview: some View {
+        HStack(spacing: 12) {
+            ClosedDiaryView(cover: cover, binding: binding, strap: strap)
+                .frame(height: previewHeight)
+                .accessibilityHidden(true)
+            openPreview
+        }
+    }
+
+    private var openPreview: some View {
         HStack(spacing: 0) {
             DiaryPaperView(pages: pages, paper: paper)
             DiarySpineView(binding: binding, cover: cover).frame(width: 18)
@@ -374,6 +465,6 @@ struct DiarySection: View {
         .clipShape(RoundedRectangle(cornerRadius: 8))
         .accessibilityElement()
         .accessibilityLabel("Diary preview")
-        .accessibilityValue("\(cover.name) cover, \(binding.name) spine, \(paper.name) \(pages.name) pages")
+        .accessibilityValue("\(cover.name) cover, \(binding.name) spine, \(paper.name) \(pages.name) pages\(strap ? ", locking strap" : "")")
     }
 }
