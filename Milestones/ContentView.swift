@@ -38,7 +38,7 @@ struct ContentView: View {
             .sheet(isPresented: Binding(get: { askedForName && askedForLock && !askedForMicrophone }, set: { _ in })) {
                 MicrophoneOfferView()
             }
-            // REM: line 010.1 — the journal hides when you leave and opens with Face ID (JournalLock.swift).
+            // REM: line 010.1 — the journal hides when you leave and opens with biometric authorization (JournalLock.swift).
             .journalLock()
             // REM: line 032.2 — the reminder's repeats are rebuilt each time you come back (a new day, a written entry).
             .onChange(of: scenePhase) { _, phase in

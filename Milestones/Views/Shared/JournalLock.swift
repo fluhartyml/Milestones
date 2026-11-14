@@ -2,7 +2,7 @@
 //  JournalLock.swift
 //  Milestones
 //
-//  The journal lock: Face ID (Touch ID or your password on a Mac, Optic ID on Vision Pro), offered at setup, switched in
+//  The journal lock: biometric authorization (whatever sensor the device has; passcode/password as the fallback), offered at setup, switched in
 //  Settings (amber sheet lines 010.1 and 010.2).
 //
 //  REM: his word 2026-11-06, line 010.1: Milestones gets a Face ID lock — his "keylock on a journal you hide under your bed
@@ -11,7 +11,7 @@
 //  with Face ID or your passcode."
 //  REM: his word 2026-11-06, line 010.2: "yes offer it at setup and has the revoking option in settings" — a "Lock your
 //  journal" card after the name card (002.1), and Settings can turn it off or back on at any time (002.2).
-//  REM: Claude's calls, noted on the sheet: turning the lock OFF asks for Face ID too (otherwise anyone holding the unlocked
+//  REM: Claude's calls, noted on the sheet: turning the lock OFF asks for biometric authorization too (otherwise anyone holding the unlocked
 //  phone could switch it off); the journal is covered the moment the app leaves the screen, so the app switcher's
 //  picture never shows a page; "Not Now" never comes back (his build-251 rule for Mediaworks: setup is never mandatory).
 //  REM: text is 18 pt at the default size and grows with your text size (his 18 pt rule).
@@ -26,14 +26,14 @@ enum JournalLockKeys {
 }
 
 enum JournalLock {
-    /// "Face ID", "Touch ID", "Optic ID" — or "your passcode" when the device has none set up.
+    /// "Biometric Authorization" on any device with a biometric sensor — or "your passcode" when the device has none set up.
+    /// REM: his word 2026-11-14 09:0x: "Bio Metric authorization" — the lock is never named after one sensor (the iPhone
+    /// Duo only has Touch ID). The sensor's own icon still shows beside it (symbol below).
     static var methodName: String {
         let context = LAContext()
         _ = context.canEvaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, error: nil)
         switch context.biometryType {
-        case .faceID: return "Face ID"
-        case .touchID: return "Touch ID"
-        case .opticID: return "Optic ID"
+        case .faceID, .touchID, .opticID: return "Biometric Authorization"
         default:
             #if os(macOS)
             return "your password"
@@ -54,7 +54,7 @@ enum JournalLock {
         }
     }
 
-    /// Asks for Face ID (or the passcode/password as the fallback). True when it is you.
+    /// Asks for biometric authorization (or the passcode/password as the fallback). True when it is you.
     static func confirm(_ reason: String) async -> Bool {
         let context = LAContext()
         var error: NSError?
