@@ -6,7 +6,18 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		5A4E0B1C2F90A1B2003C4D02 /* MilestonesShare.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 5A4E0B1C2F90A1B2003C4D01 /* MilestonesShare.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+/* End PBXBuildFile section */
+
 /* Begin PBXContainerItemProxy section */
+		5A4E0B1C2F90A1B2003C4D04 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = C0AEA9672F7DE7AE0063360B /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 5A4E0B1C2F90A1B2003C4D09;
+			remoteInfo = MilestonesShare;
+		};
 		C0AEA9812F7DE7AF0063360B /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = C0AEA9672F7DE7AE0063360B /* Project object */;
@@ -23,10 +34,25 @@
 		};
 /* End PBXContainerItemProxy section */
 
+/* Begin PBXCopyFilesBuildPhase section */
+		5A4E0B1C2F90A1B2003C4D03 /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				5A4E0B1C2F90A1B2003C4D02 /* MilestonesShare.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
 /* Begin PBXFileReference section */
 		C0AEA96F2F7DE7AE0063360B /* MilestonesJournal.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MilestonesJournal.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		C0AEA9802F7DE7AF0063360B /* MilestonesJournalTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MilestonesJournalTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		C0AEA98A2F7DE7AF0063360B /* MilestonesJournalUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MilestonesJournalUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		5A4E0B1C2F90A1B2003C4D01 /* MilestonesShare.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = MilestonesShare.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -36,6 +62,13 @@
 				Info.plist,
 			);
 			target = C0AEA96E2F7DE7AE0063360B /* MilestonesJournal */;
+		};
+		5A4E0B1C2F90A1B2003C4D08 /* Exceptions for "ShareExtension" folder in "MilestonesShare" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = 5A4E0B1C2F90A1B2003C4D09 /* MilestonesShare */;
 		};
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
@@ -56,6 +89,19 @@
 		C0AEA98D2F7DE7AF0063360B /* MilestonesUITests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			path = MilestonesUITests;
+			sourceTree = "<group>";
+		};
+		5A4E0B1C2F90A1B2003C4D06 /* ShareExtension */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				5A4E0B1C2F90A1B2003C4D08 /* Exceptions for "ShareExtension" folder in "MilestonesShare" target */,
+			);
+			path = ShareExtension;
+			sourceTree = "<group>";
+		};
+		5A4E0B1C2F90A1B2003C4D07 /* Shared */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = Shared;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -82,6 +128,13 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		5A4E0B1C2F90A1B2003C4D0B /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -89,6 +142,8 @@
 			isa = PBXGroup;
 			children = (
 				C0AEA9712F7DE7AE0063360B /* Milestones */,
+				5A4E0B1C2F90A1B2003C4D07 /* Shared */,
+				5A4E0B1C2F90A1B2003C4D06 /* ShareExtension */,
 				C0AEA9832F7DE7AF0063360B /* MilestonesTests */,
 				C0AEA98D2F7DE7AF0063360B /* MilestonesUITests */,
 				C0AEA9702F7DE7AE0063360B /* Products */,
@@ -99,6 +154,7 @@
 			isa = PBXGroup;
 			children = (
 				C0AEA96F2F7DE7AE0063360B /* MilestonesJournal.app */,
+				5A4E0B1C2F90A1B2003C4D01 /* MilestonesShare.appex */,
 				C0AEA9802F7DE7AF0063360B /* MilestonesJournalTests.xctest */,
 				C0AEA98A2F7DE7AF0063360B /* MilestonesJournalUITests.xctest */,
 			);
@@ -115,13 +171,16 @@
 				C0AEA96B2F7DE7AE0063360B /* Sources */,
 				C0AEA96C2F7DE7AE0063360B /* Frameworks */,
 				C0AEA96D2F7DE7AE0063360B /* Resources */,
+				5A4E0B1C2F90A1B2003C4D03 /* Embed Foundation Extensions */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				5A4E0B1C2F90A1B2003C4D05 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
 				C0AEA9712F7DE7AE0063360B /* Milestones */,
+				5A4E0B1C2F90A1B2003C4D07 /* Shared */,
 			);
 			name = MilestonesJournal;
 			packageProductDependencies = (
@@ -176,6 +235,29 @@
 			productReference = C0AEA98A2F7DE7AF0063360B /* MilestonesJournalUITests.xctest */;
 			productType = "com.apple.product-type.bundle.ui-testing";
 		};
+		5A4E0B1C2F90A1B2003C4D09 /* MilestonesShare */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 5A4E0B1C2F90A1B2003C4D0D /* Build configuration list for PBXNativeTarget "MilestonesShare" */;
+			buildPhases = (
+				5A4E0B1C2F90A1B2003C4D0A /* Sources */,
+				5A4E0B1C2F90A1B2003C4D0B /* Frameworks */,
+				5A4E0B1C2F90A1B2003C4D0C /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				5A4E0B1C2F90A1B2003C4D06 /* ShareExtension */,
+				5A4E0B1C2F90A1B2003C4D07 /* Shared */,
+			);
+			name = MilestonesShare;
+			packageProductDependencies = (
+			);
+			productName = MilestonesShare;
+			productReference = 5A4E0B1C2F90A1B2003C4D01 /* MilestonesShare.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -197,6 +279,9 @@
 						CreatedOnToolsVersion = 26.3;
 						TestTargetID = C0AEA96E2F7DE7AE0063360B;
 					};
+					5A4E0B1C2F90A1B2003C4D09 = {
+						CreatedOnToolsVersion = 27.1;
+					};
 				};
 			};
 			buildConfigurationList = C0AEA96A2F7DE7AE0063360B /* Build configuration list for PBXProject "MilestonesJournal" */;
@@ -216,6 +301,7 @@
 				C0AEA96E2F7DE7AE0063360B /* MilestonesJournal */,
 				C0AEA97F2F7DE7AF0063360B /* MilestonesJournalTests */,
 				C0AEA9892F7DE7AF0063360B /* MilestonesJournalUITests */,
+				5A4E0B1C2F90A1B2003C4D09 /* MilestonesShare */,
 			);
 		};
 /* End PBXProject section */
@@ -236,6 +322,13 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 		C0AEA9882F7DE7AF0063360B /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		5A4E0B1C2F90A1B2003C4D0C /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -266,6 +359,13 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		5A4E0B1C2F90A1B2003C4D0A /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
@@ -279,6 +379,11 @@
 			target = C0AEA96E2F7DE7AE0063360B /* MilestonesJournal */;
 			targetProxy = C0AEA98B2F7DE7AF0063360B /* PBXContainerItemProxy */;
 		};
+		5A4E0B1C2F90A1B2003C4D05 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 5A4E0B1C2F90A1B2003C4D09 /* MilestonesShare */;
+			targetProxy = 5A4E0B1C2F90A1B2003C4D04 /* PBXContainerItemProxy */;
+		};
 /* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
@@ -287,8 +392,9 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = Milestones/AppGroup.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 30;
+				CURRENT_PROJECT_VERSION = 31;
 				DEVELOPMENT_TEAM = 3X3F6UJ44H;
 				ENABLE_APP_SANDBOX = YES;
 				ENABLE_HARDENED_RUNTIME = YES;
@@ -339,8 +445,9 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = Milestones/AppGroup.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 30;
+				CURRENT_PROJECT_VERSION = 31;
 				DEVELOPMENT_TEAM = 3X3F6UJ44H;
 				ENABLE_APP_SANDBOX = YES;
 				ENABLE_HARDENED_RUNTIME = YES;
@@ -507,7 +614,7 @@
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 30;
+				CURRENT_PROJECT_VERSION = 31;
 				DEVELOPMENT_TEAM = 3X3F6UJ44H;
 				GENERATE_INFOPLIST_FILE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 26.2;
@@ -533,7 +640,7 @@
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 30;
+				CURRENT_PROJECT_VERSION = 31;
 				DEVELOPMENT_TEAM = 3X3F6UJ44H;
 				GENERATE_INFOPLIST_FILE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 26.2;
@@ -558,7 +665,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 30;
+				CURRENT_PROJECT_VERSION = 31;
 				DEVELOPMENT_TEAM = 3X3F6UJ44H;
 				GENERATE_INFOPLIST_FILE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 26.2;
@@ -583,7 +690,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 30;
+				CURRENT_PROJECT_VERSION = 31;
 				DEVELOPMENT_TEAM = 3X3F6UJ44H;
 				GENERATE_INFOPLIST_FILE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 26.2;
@@ -600,6 +707,94 @@
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2,7";
 				TEST_TARGET_NAME = MilestonesJournal;
+				XROS_DEPLOYMENT_TARGET = 26.2;
+			};
+			name = Release;
+		};
+		5A4E0B1C2F90A1B2003C4D0E /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				APPLICATION_EXTENSION_API_ONLY = YES;
+				CODE_SIGN_ENTITLEMENTS = ShareExtension/ShareExtension.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 31;
+				DEVELOPMENT_TEAM = 3X3F6UJ44H;
+				ENABLE_APP_SANDBOX = YES;
+				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_USER_SELECTED_FILES = readonly;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = ShareExtension/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = Milestones;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.6;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@executable_path/../../../../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 14.6;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.inkwell.Milestones.Share;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				REGISTER_APP_GROUPS = YES;
+				SDKROOT = auto;
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx xros xrsimulator";
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2,7";
+				XROS_DEPLOYMENT_TARGET = 26.2;
+			};
+			name = Debug;
+		};
+		5A4E0B1C2F90A1B2003C4D0F /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				APPLICATION_EXTENSION_API_ONLY = YES;
+				CODE_SIGN_ENTITLEMENTS = ShareExtension/ShareExtension.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 31;
+				DEVELOPMENT_TEAM = 3X3F6UJ44H;
+				ENABLE_APP_SANDBOX = YES;
+				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_USER_SELECTED_FILES = readonly;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = ShareExtension/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = Milestones;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.6;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@executable_path/../../../../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 14.6;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.inkwell.Milestones.Share;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				REGISTER_APP_GROUPS = YES;
+				SDKROOT = auto;
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx xros xrsimulator";
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2,7";
 				XROS_DEPLOYMENT_TARGET = 26.2;
 			};
 			name = Release;
@@ -639,6 +834,15 @@
 			buildConfigurations = (
 				C0AEA99C2F7DE7AF0063360B /* Debug */,
 				C0AEA99D2F7DE7AF0063360B /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		5A4E0B1C2F90A1B2003C4D0D /* Build configuration list for PBXNativeTarget "MilestonesShare" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				5A4E0B1C2F90A1B2003C4D0E /* Debug */,
+				5A4E0B1C2F90A1B2003C4D0F /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

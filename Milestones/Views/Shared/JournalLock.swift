@@ -77,6 +77,8 @@ struct JournalLockGate: ViewModifier {
 
     func body(content: Content) -> some View {
         content
+            // REM: amber B-031.3 / B-031.5 — a shared entry waits until the journal is open; it never shows over the lock.
+            .environment(\.journalLocked, lockOn && (locked || covered))
             .overlay {
                 if lockOn && (locked || covered) {
                     LockScreen(asking: asking, unlock: unlock)
@@ -147,6 +149,11 @@ private struct LockScreen: View {
 extension View {
     /// Covers the journal while it is locked (JournalLock.swift).
     func journalLock() -> some View { modifier(JournalLockGate()) }
+}
+
+extension EnvironmentValues {
+    /// True while the lock screen covers the journal.
+    @Entry var journalLocked = false
 }
 
 // MARK: - The setup card (010.2)

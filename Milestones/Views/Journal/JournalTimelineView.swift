@@ -13,6 +13,13 @@ struct JournalTimelineView: View {
     @Environment(\.modelContext) private var modelContext
     @Query(sort: \MilestoneEntry.eventDate, order: .reverse) private var entries: [MilestoneEntry]
 
+    /// REM: amber B-031.3 / B-031.5 — an entry made from a share (ContentView.takeShares), opened here to edit.
+    @Binding var sharedEntry: MilestoneEntry?
+    @Environment(\.journalLocked) private var journalLocked
+    @AppStorage(UserNameKeys.asked) private var askedForName = false
+    @AppStorage(JournalLockKeys.asked) private var askedForLock = false
+    @AppStorage(MicrophoneAccess.askedKey) private var askedForMicrophone = false
+
     @State private var showingEntry = false
     // REM: line 002.1 — "greets you by name at the top of the journal". No name, no greeting.
     @AppStorage(UserNameKeys.name) private var userName = ""
@@ -78,6 +85,8 @@ struct JournalTimelineView: View {
                 if let entry = activeEntry {
                     NavigationStack {
                         EntryDetailView(entry: entry)
+                            // A shared entry can replace the one open; a fresh screen, not the last one's state.
+                            .id(entry.persistentModelID)
                             .toolbar {
                                 ToolbarItem(placement: .confirmationAction) {
                                     Button("Done") {
@@ -90,8 +99,23 @@ struct JournalTimelineView: View {
             }
             .onAppear {
                 locationService.requestPermission()
+                openSharedEntry()
             }
+            .onChange(of: sharedEntry) { _, _ in openSharedEntry() }
+            .onChange(of: journalLocked) { _, _ in openSharedEntry() }
+            .onChange(of: askedForMicrophone) { _, _ in openSharedEntry() }
         }
+    }
+
+    /// REM: amber B-031.3 — "opens it as a new entry for the person to edit and save". Opens the shared entry full
+    /// screen once nothing stands in front of it: not under the lock screen, not over the first-launch cards.
+    private func openSharedEntry() {
+        guard let entry = sharedEntry, !journalLocked,
+              askedForName, askedForLock, askedForMicrophone else { return }
+        sharedEntry = nil
+        selectedDay = nil
+        activeEntry = entry
+        showingEntry = true
     }
 
     // MARK: - Subviews

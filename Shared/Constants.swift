@@ -7,7 +7,9 @@
 
 import Foundation
 
-enum AppConstants {
+// REM: amber B-031.5 — the Share extension downsizes shared photos with the same size and quality the app uses, so this
+// file is in both targets (Shared/). nonisolated so the extension can read it while it works off the main thread.
+nonisolated enum AppConstants {
 
     /// App display name
     static let appName = "Milestones"

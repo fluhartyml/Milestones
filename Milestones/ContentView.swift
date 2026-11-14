@@ -18,6 +18,14 @@ struct ContentView: View {
     // REM: amber B-031 — the Microphone card follows the lock card, once (MicrophoneOfferView).
     @AppStorage(MicrophoneAccess.askedKey) private var askedForMicrophone = false
     @Environment(\.scenePhase) private var scenePhase
+    @Environment(\.modelContext) private var modelContext
+
+    /// The tab showing. Contents first, as before.
+    @State private var tab: MainTab = .contents
+    /// REM: amber B-031.3 / B-031.5 — the newest entry made from a share, waiting for the Journal tab to open it.
+    @State private var sharedEntry: MilestoneEntry?
+
+    private enum MainTab: Hashable { case contents, journal, about, index, settings }
 
     var body: some View {
         tabs
@@ -34,26 +42,46 @@ struct ContentView: View {
             .journalLock()
             // REM: line 032.2 — the reminder's repeats are rebuilt each time you come back (a new day, a written entry).
             .onChange(of: scenePhase) { _, phase in
-                if phase == .active { Task { await ReminderService.refresh() } }
+                if phase == .active {
+                    takeShares()
+                    Task { await ReminderService.refresh() }
+                }
             }
+            .task { takeShares() }
+    }
+
+    /// REM: amber B-031.3 — shared text "opens it as a new entry for the person to edit and save"; B-031.5 — shared
+    /// photos arrive as "the photo stack" with what you wrote about them. Every share waiting in the inbox becomes a
+    /// saved entry (ShareInbox+Import.swift); the Journal tab comes forward and opens the newest one to edit.
+    private func takeShares() {
+        guard let entry = ShareInbox.takeAll(into: modelContext) else { return }
+        tab = .journal
+        sharedEntry = entry
+        // REM: line 032.2 — an entry written today stops today's reminder repeats, the same as one made with +.
+        if Calendar.current.isDateInToday(entry.createdAt) {
+            Task { await ReminderService.entryWritten() }
+        }
     }
 
     private var tabs: some View {
-        TabView {
+        TabView(selection: $tab) {
             TableOfContentsView()
                 .tabItem {
                     Label("Contents", systemImage: "list.bullet")
                 }
+                .tag(MainTab.contents)
 
-            JournalTimelineView()
+            JournalTimelineView(sharedEntry: $sharedEntry)
                 .tabItem {
                     Label("Journal", systemImage: "book")
                 }
+                .tag(MainTab.journal)
 
             AboutView()
                 .tabItem {
                     Label("About", systemImage: "info.circle")
                 }
+                .tag(MainTab.about)
 
             // REM: amber B-183.8, his word 2026-11-09 19:3x: "yes replace it with the index index sounds more natural."
             // "The Appendix goes; an Index by sense and glyph takes its place". Same place in the tab bar.
@@ -61,6 +89,7 @@ struct ContentView: View {
                 .tabItem {
                     Label("Index", systemImage: "list.bullet.indent")
                 }
+                .tag(MainTab.index)
 
             // REM: line 001.12 — Settings holds Access Location. On the Mac it is the Settings
             // window (Command-comma) instead, see MilestonesApp.
@@ -69,6 +98,7 @@ struct ContentView: View {
                 .tabItem {
                     Label("Settings", systemImage: "gearshape")
                 }
+                .tag(MainTab.settings)
             #endif
         }
     }

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<!-- REM: amber B-031.3 / B-031.5 — same App Group as the app, so a share waits in the inbox for Milestones to open. -->
+<dict>
+	<key>com.apple.security.application-groups</key>
+	<array>
+		<string>group.com.inkwell.Milestones</string>
+	</array>
+</dict>
+</plist>
