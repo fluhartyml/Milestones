@@ -45,6 +45,15 @@ struct OpenBook<Single: View, Left: View, Right: View>: View {
     @AppStorage(DiaryKeys.ribbon) private var ribbon = true
     @AppStorage(DiaryKeys.pages) private var pages: DiaryPages = .wideRuled
     @AppStorage(DiaryKeys.paper) private var paper: DiaryPaper = .white
+    // REM: B-182.3, his "code it" 2026-11-14 — handwriting, date per page and the extras (DiaryStyle.swift).
+    @AppStorage(DiaryKeys.hand) private var hand: DiaryHand = .print
+    @AppStorage(DiaryKeys.tabs) private var tabs = false
+    @AppStorage(DiaryKeys.flags) private var flags = false
+    @AppStorage(DiaryKeys.penLoop) private var penLoop = false
+    @AppStorage(DiaryKeys.pocket) private var pocket = false
+    @Environment(\.diaryPageDate) private var pageDate
+    @ScaledMetric(relativeTo: .body) private var handSize: CGFloat = 20
+    @ScaledMetric(relativeTo: .body) private var dateHead: CGFloat = 34
 
     /// - Parameters:
     ///   - single: the closed (one-page) layout's rows, in today's order.
@@ -97,6 +106,11 @@ struct OpenBook<Single: View, Left: View, Right: View>: View {
                         .accessibilityHidden(true)
                 }
             }
+            .overlay {
+                DiaryExtras(spine: spine, edge: coverEdge, gutter: gutter,
+                            month: Calendar.current.component(.month, from: pageDate ?? .now),
+                            tabs: tabs, flags: flags, penLoop: penLoop, pocket: pocket)
+            }
         }
     }
 
@@ -106,8 +120,10 @@ struct OpenBook<Single: View, Left: View, Right: View>: View {
             Group { content() }
                 .listRowBackground(Color.clear)
         }
+        .font(hand.font(size: handSize))
+        .contentMargins(.top, pages == .dayPerPage ? dateHead * 2.2 : 0, for: .scrollContent)
         .scrollContentBackground(.hidden)
-        .background { DiaryPaperView(pages: pages, paper: paper).accessibilityHidden(true) }
+        .background { DiaryPaperView(pages: pages, paper: paper, date: pageDate ?? .now).accessibilityHidden(true) }
         .environment(\.colorScheme, .light)
         .clipShape(RoundedRectangle(cornerRadius: 4))
         .shadow(color: .black.opacity(0.3), radius: 2, y: 1)
@@ -121,6 +137,11 @@ extension OpenBook where Single == TupleView<(Left, Right)> {
         let r = right()
         self.init(single: { l; r }, left: { l }, right: { r })
     }
+}
+
+extension EnvironmentValues {
+    /// The day an open diary page belongs to; One Day per Page prints it at the top.
+    @Entry var diaryPageDate: Date? = nil
 }
 
 // MARK: - Hinge probe (iPhone Duo)

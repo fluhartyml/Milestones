@@ -63,6 +63,8 @@ struct EntryDetailView: View {
             rightPage
         }
         .font(.system(size: bodySize))
+        // REM: B-182.3 "one day per page with the date printed at the top" — the open book prints this entry's day.
+        .environment(\.diaryPageDate, entry.createdAt)
         // REM: F-M1 mockup: ".safeAreaInset(edge: .bottom) › HStack" — "The five senses sit in a bar pinned to the
         // bottom (.safeAreaInset), so they stay put while you scroll. Tapping one opens its sheet of glyphs, its tool
         // glyph included (B-183.7.1)."

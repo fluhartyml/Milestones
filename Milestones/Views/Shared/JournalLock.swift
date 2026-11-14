@@ -115,7 +115,11 @@ private struct LockScreen: View {
     let unlock: () -> Void
     // REM: B-182.2, his "code it" 2026-11-14 — with Locking Strap on, the lock screen is the closed diary, strapped shut;
     // the key (biometric authorization) opens it. Tapping the clasp works too (DiaryStyle.swift).
-    @AppStorage(DiaryKeys.strap) private var strap = false
+    @AppStorage(DiaryKeys.strap) private var legacyStrap = false
+    @AppStorage(DiaryKeys.closure) private var storedClosure: DiaryClosure = .none
+    @AppStorage(DiaryKeys.stamp) private var stamp = ""
+    private var closure: DiaryClosure { DiaryClosure.current(storedClosure, legacyStrap: legacyStrap) }
+    private var strap: Bool { closure != .none }
     @AppStorage(DiaryKeys.cover) private var cover: DiaryCover = .blackMarble
     @AppStorage(DiaryKeys.binding) private var binding: DiaryBinding = .clothTape
     @ScaledMetric(relativeTo: .body) private var diaryHeight: CGFloat = 300
@@ -129,7 +133,7 @@ private struct LockScreen: View {
             VStack(spacing: 20) {
                 if strap {
                     Button(action: unlock) {
-                        ClosedDiaryView(cover: cover, binding: binding, strap: true)
+                        ClosedDiaryView(cover: cover, binding: binding, closure: closure, stamp: stamp)
                             .frame(maxHeight: diaryHeight)
                     }
                     .buttonStyle(.plain)
