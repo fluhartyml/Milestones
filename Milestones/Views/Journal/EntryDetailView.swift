@@ -39,6 +39,8 @@ struct EntryDetailView: View {
     @State private var addendumTarget: AddendumTarget?
     @State private var editingSenses = false
     @State private var selectedStickerID: PersistentIdentifier?
+    /// B-182.4: the ticket, photo or tape strip being moved (TapedIn.swift).
+    @State private var selectedTapedID: PersistentIdentifier?
     /// B-183.7: drawing on the entry card (EntryDrawingView.swift).
     @State private var isDrawing = false
     @ScaledMetric(relativeTo: .body) private var drawingRoom: CGFloat = 260
@@ -64,7 +66,7 @@ struct EntryDetailView: View {
         }
         .font(.system(size: bodySize))
         // REM: B-182.3 "one day per page with the date printed at the top" — the open book prints this entry's day.
-        .environment(\.diaryPageDate, entry.createdAt)
+        .environment(\.diaryPageDate, entry.eventDate)
         // REM: F-M1 mockup: ".safeAreaInset(edge: .bottom) › HStack" — "The five senses sit in a bar pinned to the
         // bottom (.safeAreaInset), so they stay put while you scroll. Tapping one opens its sheet of glyphs, its tool
         // glyph included (B-183.7.1)."
@@ -171,7 +173,14 @@ struct EntryDetailView: View {
             }
             // REM: B-183.7 "so you can type or draw near it with Apple Pencil" — while you draw, the card is at least
             // drawingRoom tall so there is room around the glyphs; the drawing sits over the words, under the stickers.
-            .frame(minHeight: isDrawing || entry.drawing != nil ? drawingRoom : nil, alignment: .top)
+            .frame(minHeight: isDrawing || entry.drawing != nil || !entry.sortedTapedItems.isEmpty ? drawingRoom : nil,
+                   alignment: .top)
+            // REM: B-182.4 — tickets, photos and washi tape lie on the words like paper taped in; the drawing and the
+            // stickers go over them.
+            .overlay {
+                TapedInLayer(entry: entry, selectedID: $selectedTapedID)
+                    .allowsHitTesting(!isDrawing)
+            }
             .overlay {
                 EntryDrawingLayer(entry: entry, isDrawing: isDrawing)
             }
@@ -185,6 +194,10 @@ struct EntryDetailView: View {
             }
 
             DrawingControls(entry: entry, isDrawing: $isDrawing)
+
+            if !isDrawing {
+                TapeInControls(entry: entry, selectedID: $selectedTapedID)
+            }
 
             // REM: The face picked to start the entry (his TestFlight feedback, build 21) — changeable here.
             Picker("Feeling", selection: $entry.feeling) {

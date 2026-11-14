@@ -104,6 +104,17 @@ final class MilestoneEntry {
     @Relationship(deleteRule: .cascade, inverse: \EntrySticker.entry)
     var stickers: [EntrySticker]? = []
 
+    // MARK: - Taped in (amber B-182.4)
+
+    /// Tickets, photos and washi tape laid on the entry. Optional with a default (lightweight migration).
+    @Relationship(deleteRule: .cascade, inverse: \TapedItem.entry)
+    var tapedItems: [TapedItem]? = []
+
+    /// Oldest first, so a newer one lies on top.
+    var sortedTapedItems: [TapedItem] {
+        (tapedItems ?? []).sorted { $0.createdAt < $1.createdAt }
+    }
+
     // MARK: - Init
 
     init(

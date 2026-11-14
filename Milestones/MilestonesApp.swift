@@ -35,6 +35,8 @@ struct MilestonesApp: App {
             Addendum.self,
             // REM: amber B-183.7.3 — glyphs stamped on an entry like stickers; optional, so older stores open unchanged.
             EntrySticker.self,
+            // REM: amber B-182.4 — tickets, photos and washi tape taped onto an entry; optional, so older stores open.
+            TapedItem.self,
         ])
         let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
 
