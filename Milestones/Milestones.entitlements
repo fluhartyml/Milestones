@@ -1,6 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
+<!--
+  REM: his word 2026-11-13: "yes connect it" — this file (iCloud/CloudKit, push, WeatherKit) was never wired to the app
+  target, so WeatherKit weather stamping couldn't work. Now it's the app's entitlements, with the Share extension's
+  App Group (B-031.3 / B-031.5) folded in from AppGroup.entitlements.
+-->
 <dict>
 	<key>aps-environment</key>
 	<string>development</string>
@@ -11,6 +16,10 @@
 	<key>com.apple.developer.icloud-services</key>
 	<array>
 		<string>CloudKit</string>
+	</array>
+	<key>com.apple.security.application-groups</key>
+	<array>
+		<string>group.com.inkwell.Milestones</string>
 	</array>
 	<key>com.apple.developer.weatherkit</key>
 	<true/>
