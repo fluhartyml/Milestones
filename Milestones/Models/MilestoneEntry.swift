@@ -104,6 +104,13 @@ final class MilestoneEntry {
     @Relationship(deleteRule: .cascade, inverse: \EntrySticker.entry)
     var stickers: [EntrySticker]? = []
 
+    // MARK: - Page layers (his design 2026-11-14, PageLayers.swift)
+
+    /// This page's own background picture (JPEG), the bottom layer. Nil = the all-pages picture, or none.
+    @Attribute(.externalStorage) var pageBackground: Data?
+    /// The Apple Pencil ink over the whole screen (a PencilKit drawing), the top layer.
+    @Attribute(.externalStorage) var pageInk: Data?
+
     // MARK: - Taped in (amber B-182.4)
 
     /// Tickets, photos and washi tape laid on the entry. Optional with a default (lightweight migration).

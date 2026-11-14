@@ -52,6 +52,10 @@ struct OpenBook<Single: View, Left: View, Right: View>: View {
     @AppStorage(DiaryKeys.penLoop) private var penLoop = false
     @AppStorage(DiaryKeys.pocket) private var pocket = false
     @Environment(\.diaryPageDate) private var pageDate
+    // REM: his design 2026-11-14 — the page background picture is the bottom layer (PageLayers.swift).
+    @Environment(\.pageBackgroundData) private var backgroundData
+    @AppStorage(AllPagesBackground.versionKey) private var backgroundVersion = 0
+    private var hasBackground: Bool { backgroundVersion >= 0 && PageBackgroundView.hasAny(backgroundData) }
     @ScaledMetric(relativeTo: .body) private var handSize: CGFloat = 20
     @ScaledMetric(relativeTo: .body) private var dateHead: CGFloat = 34
 
@@ -75,6 +79,8 @@ struct OpenBook<Single: View, Left: View, Right: View>: View {
                 spread(spine: spine)
             } else {
                 Form { single }
+                    .scrollContentBackground(hasBackground ? .hidden : .automatic)
+                    .background { if hasBackground { PageBackgroundView(pageData: backgroundData).ignoresSafeArea() } }
             }
         }
         #if os(iOS)
@@ -123,7 +129,13 @@ struct OpenBook<Single: View, Left: View, Right: View>: View {
         .font(hand.font(size: handSize))
         .contentMargins(.top, pages == .dayPerPage ? dateHead * 2.2 : 0, for: .scrollContent)
         .scrollContentBackground(.hidden)
-        .background { DiaryPaperView(pages: pages, paper: paper, date: pageDate ?? .now).accessibilityHidden(true) }
+        .background {
+            if hasBackground {
+                PageBackgroundView(pageData: backgroundData)
+            } else {
+                DiaryPaperView(pages: pages, paper: paper, date: pageDate ?? .now).accessibilityHidden(true)
+            }
+        }
         .environment(\.colorScheme, .light)
         .clipShape(RoundedRectangle(cornerRadius: 4))
         .shadow(color: .black.opacity(0.3), radius: 2, y: 1)
